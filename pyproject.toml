@@ -18,8 +18,11 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-torchapp = "^0.1.29"
+python = ">=3.8,<3.12"
+torchapp = {git = "https://github.com/rbturnbull/torchapp.git", branch="diffusion"}
+hierarchicalsoftmax = {git = "https://github.com/rbturnbull/hierarchicalsoftmax.git", branch="main"}
+h5py = "^3.8.0"
+anytree = "^2.8.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
