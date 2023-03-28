@@ -65,7 +65,7 @@ class Corkie(ta.TorchApp):
                 
                 node = SoftmaxNode(name=lineage[-1], parent=parent, title=row['title'])
                 self.classification_nodes[lineage_string] = node
-
+        self.classification_tree.set_indexes()
         try:
             text_file = Path("classification_tree.txt")
             text_file.write_text(str(self.classification_tree.render()))
@@ -90,14 +90,20 @@ class Corkie(ta.TorchApp):
             DataLoaders: The DataLoaders object.
         """
         self.famdb = FamDB(famdb)
-        accessions = self.famdb.get_family_accessions()
         self.accession_to_node_id = {}
 
-        for accession in accessions:
+        accessions = []
+        for accession in self.famdb.get_family_accessions():
             family = self.famdb.get_family_by_accession(accession)
-            node = self.classification_nodes[family.classification]
+            if not hasattr(family, "classification") or not family.classification:
+                continue
+            classification = family.classification.replace("root;","")
+            assert classification
+            assert classification in self.classification_nodes
+            node = self.classification_nodes[classification]
             node_id = self.classification_tree.node_to_id[node]
             self.accession_to_node_id[accession] = node_id
+            accessions.append(accession)
 
         datablock = DataBlock(
             blocks=[TransformBlock, TransformBlock],
