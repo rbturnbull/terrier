@@ -33,10 +33,12 @@ class Corkie(fa.TorchApp):
                 self.classification_nodes[lineage_string] = node
 
         try:
-            self.classification_tree.render(filepath="dfam.svg")
-            self.classification_tree.render(filepath="dfam.png")
-        except:
-            print("Cannot render classification tree")
+            text_file = Path("classification_tree.txt")
+            text_file.write_text(str(self.classification_tree.render()))
+            self.classification_tree.render(filepath="classification_tree.svg")
+            self.classification_tree.render(filepath="classification_tree.png")
+        except Exception as err:
+            print(f"Cannot render classification tree {err}")
 
     def dataloaders(
         self,
