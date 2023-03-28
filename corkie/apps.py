@@ -97,12 +97,15 @@ class Corkie(ta.TorchApp):
             family = self.famdb.get_family_by_accession(accession)
             if not hasattr(family, "classification") or not family.classification:
                 continue
+            if family.length < 64:
+                continue
             classification = family.classification.replace("root;","")
             assert classification
             assert classification in self.classification_nodes
             node = self.classification_nodes[classification]
             node_id = self.classification_tree.node_to_id[node]
             self.accession_to_node_id[accession] = node_id
+            
             accessions.append(accession)
 
         datablock = DataBlock(
