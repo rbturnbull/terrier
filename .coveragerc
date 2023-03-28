@@ -1,0 +1,5 @@
+[run]
+source = corkie
+
+[report]
+precision = 2
