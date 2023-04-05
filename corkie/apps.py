@@ -24,16 +24,29 @@ class DictionaryGetter:
         return value
 
 
-class SequenceGetter():
-    def __init__(self, famdb):
+class FamDBObject():
+    def __init__(self, famdb=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.famdb = famdb
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state["famdb"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.famdb = None
+    
+
+class SequenceGetter(FamDBObject):
     def __call__(self, accession:str):
+        assert self.famdb
         family = self.famdb.get_family_by_accession(accession)
         return dna_seq_to_tensor(family.consensus)
 
 
-class ClassificationGetter():
+class ClassificationGetter(FamDBObject):
     def __init__(self, famdb, classification_nodes):
         self.famdb = famdb
         self.classification_nodes = classification_nodes
@@ -44,7 +57,7 @@ class ClassificationGetter():
 
 
 
-class Corkie(ta.TorchApp):
+class Corkie(FamDBObject, ta.TorchApp):
     """
     Classifier of Repeats
     """
@@ -78,6 +91,7 @@ class Corkie(ta.TorchApp):
         self,
         famdb:Path = ta.Param(help="The FamDB file (hdf5) input file from Dfam."), 
         batch_size:int = ta.Param(default=1, help="The batch size."),
+        max_count:int = ta.Param(default=None, help="The maximum number of families to train with. Default unlimited."),
     ) -> DataLoaders:
         """
         Creates a FastAI DataLoaders object which Corkie uses in training and prediction.
@@ -107,6 +121,9 @@ class Corkie(ta.TorchApp):
             self.accession_to_node_id[accession] = node_id
             
             accessions.append(accession)
+
+        if max_count:
+            accessions = accessions[:max_count]
 
         datablock = DataBlock(
             blocks=[TransformBlock, TransformBlock],
