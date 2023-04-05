@@ -3,6 +3,7 @@ from pathlib import Path
 from torch import nn
 from fastai.data.core import DataLoaders
 import torchapp as ta
+from fastai.learner import load_learner
 from rich.console import Console
 from fastai.data.block import DataBlock, TransformBlock
 from fastai.data.transforms import RandomSplitter
@@ -147,6 +148,10 @@ class Corkie(FamDBObject, ta.TorchApp):
 
     def model(
         self,
+        corgi:Path = ta.Param(
+            default=None,
+            help="A pretrained corgi exported app.",
+        ),
         embedding_dim: int = ta.Param(
             default=8,
             help="The size of the embeddings for the nucleotides (N, A, G, C, T).",
@@ -212,7 +217,16 @@ class Corkie(FamDBObject, ta.TorchApp):
         Returns:
             nn.Module: The created model.
         """
-        # TODO - get pretrained
+        if corgi:
+            corgi_learner = load_learner(corgi)
+            final_in_features = list(corgi_learner.model.final.modules())[1].in_features
+            corgi_learner.model.final = nn.Sequential(
+                nn.Linear(in_features=final_in_features, out_features=final_in_features, bias=True),
+                nn.ReLU(),
+                nn.Linear(in_features=final_in_features, out_features=self.classification_tree.layer_size, bias=final_bias),
+            )
+            return corgi_learner.model
+
         return ConvClassifier(
             num_embeddings=5,  # i.e. the size of the vocab which is N, A, C, G, T
             kernel_size=kernel_size,
