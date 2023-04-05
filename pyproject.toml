@@ -23,6 +23,7 @@ torchapp = {git = "https://github.com/rbturnbull/torchapp.git", branch="diffusio
 hierarchicalsoftmax = {git = "https://github.com/rbturnbull/hierarchicalsoftmax.git", branch="main"}
 h5py = "^3.8.0"
 anytree = "^2.8.0"
+bio-corgi = "^0.2.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
