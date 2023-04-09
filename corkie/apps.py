@@ -15,6 +15,9 @@ import torch
 from .famdb import FamDB
 from corgi.tensor import dna_seq_to_tensor
 from corgi.models import ConvClassifier
+from fastcore.foundation import mask2idxs
+from fastai.data.transforms import IndexSplitter
+
 
 
 def greedy_attribute_accuracy(prediction_tensor, target_tensor, root, attribute):
@@ -34,6 +37,15 @@ class DictionaryGetter:
     def __call__(self, key):
         value = self.dictionary[key]
         return value
+
+
+class SetSplitter:
+    def __init__(self, data):
+        self.data = set(data)
+
+    def __call__(self, objects):
+        validation_indexes = mask2idxs(object in self.data for object in objects)
+        return IndexSplitter(validation_indexes)(objects)
 
 
 class FamDBObject():
@@ -121,6 +133,7 @@ class Corkie(FamDBObject, ta.TorchApp):
         famdb:Path = ta.Param(help="The FamDB file (hdf5) input file from Dfam."), 
         batch_size:int = ta.Param(default=1, help="The batch size."),
         max_count:int = ta.Param(default=None, help="The maximum number of families to train with. Default unlimited."),
+        validation:Path = ta.Param(default=None, help="The path to a list of accessions to use as validation.")
     ) -> DataLoaders:
         """
         Creates a FastAI DataLoaders object which Corkie uses in training and prediction.
@@ -136,6 +149,7 @@ class Corkie(FamDBObject, ta.TorchApp):
         self.accession_to_node_id = {}
 
         accessions = []
+        
         for accession in self.famdb.get_family_accessions():
             family = self.famdb.get_family_by_accession(accession)
             if not hasattr(family, "classification") or not family.classification:
@@ -150,15 +164,20 @@ class Corkie(FamDBObject, ta.TorchApp):
             self.accession_to_node_id[accession] = node_id
             
             accessions.append(accession)
+            if max_count and len(accessions) >= max_count:
+                break
 
-        if max_count:
-            accessions = accessions[:max_count]
+        if validation:
+            validation_accessions = Path(validation).read_text().strip().split("\n")
+            splitter = SetSplitter(validation_accessions)
+        else:
+            splitter = RandomSplitter()
 
         datablock = DataBlock(
             blocks=[TransformBlock, TransformBlock],
             get_x=SequenceGetter(famdb=self.famdb),
             get_y=DictionaryGetter(self.accession_to_node_id),
-            splitter=RandomSplitter(),
+            splitter=splitter,
         )
 
         return datablock.dataloaders(accessions, bs=batch_size)
