@@ -1,6 +1,4 @@
-================================================================
-Terrier
-================================================================
+.. image:: https://raw.githubusercontent.com/rbturnbull/terrier/main/docs/images/terrier-banner.svg
 
 .. start-badges
 
@@ -25,7 +23,7 @@ Terrier
 
 .. start-quickstart
 
-Classifier of Repeats
+Transposable Element Repeat Result classifIER
 
 Installation
 ==================================
