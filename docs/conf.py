@@ -18,14 +18,14 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = "Corkie"
+project = "Terrier"
 copyright = "2022, Robert Turnbull"
 author = "Robert Turnbull"
 
 # The full version, including alpha/beta/rc tags
 release = "0.1.0"
 # import importlib.metadata
-# release = importlib.metadata.version('corkie')
+# release = importlib.metadata.version('terrier')
 
 
 # -- General configuration ---------------------------------------------------

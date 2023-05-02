@@ -83,7 +83,7 @@ class ClassificationGetter(FamDBObject):
 
 
 
-class Corkie(FamDBObject, ta.TorchApp):
+class Terrier(FamDBObject, ta.TorchApp):
     """
     Classifier of Repeats
     """
@@ -138,7 +138,7 @@ class Corkie(FamDBObject, ta.TorchApp):
         validation:Path = ta.Param(default=None, help="The path to a list of accessions to use as validation.")
     ) -> DataLoaders:
         """
-        Creates a FastAI DataLoaders object which Corkie uses in training and prediction.
+        Creates a FastAI DataLoaders object which Terrier uses in training and prediction.
 
         Args:
             inputs (Path): The input file.

@@ -1,22 +1,22 @@
 ================================================================
-Corkie
+Terrier
 ================================================================
 
 .. start-badges
 
 |testing badge| |coverage badge| |docs badge| |black badge| |torchapp badge|
 
-.. |testing badge| image:: https://github.com/rbturnbull/corkie/actions/workflows/testing.yml/badge.svg
-    :target: https://github.com/rbturnbull/corkie/actions
+.. |testing badge| image:: https://github.com/rbturnbull/terrier/actions/workflows/testing.yml/badge.svg
+    :target: https://github.com/rbturnbull/terrier/actions
 
-.. |docs badge| image:: https://github.com/rbturnbull/corkie/actions/workflows/docs.yml/badge.svg
-    :target: https://rbturnbull.github.io/corkie
+.. |docs badge| image:: https://github.com/rbturnbull/terrier/actions/workflows/docs.yml/badge.svg
+    :target: https://rbturnbull.github.io/terrier
     
 .. |black badge| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
     
 .. |coverage badge| image:: https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rbturnbull//raw/coverage-badge.json
-    :target: https://rbturnbull.github.io/corkie/coverage/
+    :target: https://rbturnbull.github.io/terrier/coverage/
 
 .. |torchapp badge| image:: https://img.shields.io/badge/MLOpps-torchapp-B1230A.svg
     :target: https://rbturnbull.github.io/torchapp/
@@ -34,7 +34,7 @@ Install using pip:
 
 .. code-block:: bash
 
-    pip install git+https://github.com/rbturnbull/corkie.git
+    pip install git+https://github.com/rbturnbull/terrier.git
 
 
 Usage
@@ -44,13 +44,13 @@ See the options for training a model with the command:
 
 .. code-block:: bash
 
-    corkie train --help
+    terrier train --help
 
 See the options for making inferences with the command:
 
 .. code-block:: bash
 
-    corkie infer --help
+    terrier infer --help
 
 .. end-quickstart
 

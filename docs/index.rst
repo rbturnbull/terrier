@@ -1,9 +1,9 @@
-.. Corkie documentation master file, created by
+.. Terrier documentation master file, created by
    sphinx-quickstart on Tue Mar 15 16:05:31 2022.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Corkie's documentation!
+Welcome to Terrier's documentation!
 ===========================================================
 
 .. include:: ../README.rst

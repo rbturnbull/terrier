@@ -2,6 +2,6 @@
 Command Line Interface Reference
 ================================
 
-.. click:: corkie.apps:Corkie.click
-   :prog: corkie
+.. click:: terrier.apps:Terrier.click
+   :prog: terrier
    :nested: full

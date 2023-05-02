@@ -1,6 +1,6 @@
 import typer
 from pathlib import Path
-from corkie.famdb import FamDB
+from terrier.famdb import FamDB
 
 
 def main(path: Path):

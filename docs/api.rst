@@ -2,7 +2,7 @@
 API Reference
 =======================
 
-.. automodule:: corkie.apps
+.. automodule:: terrier.apps
     :members:
     :inherited-members:
 

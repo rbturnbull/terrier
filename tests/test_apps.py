@@ -1,6 +1,6 @@
 from torchapp.testing import TorchAppTestCase
-from corkie.apps import Corkie
+from terrier.apps import Terrier
 
 
-class TestCorkie(TorchAppTestCase):
-    app_class = Corkie
+class TestTerrier(TorchAppTestCase):
+    app_class = Terrier
