@@ -1,3 +1,4 @@
+import sys
 import re
 from pathlib import Path
 from Bio import SeqIO
@@ -28,7 +29,8 @@ class MaskedDataloader(SeqIODataloader):
                 if self.max_seqs and seqs >= self.max_seqs:
                     break
 
-                repeats = self.matcher.findall(record.seq)
+                
+                repeats = self.matcher.findall(str(record.seq))
                 for repeat in repeats:
                     if len(repeat) < min_length:
                         continue
@@ -47,7 +49,7 @@ class MaskedDataloader(SeqIODataloader):
                     break
 
                 seqs += 1
-                repeats = self.matcher.finditer(record.seq)
+                repeats = self.matcher.finditer(str(record.seq))
                 for repeat in repeats:
                     start = repeat.start()
                     end = repeat.end()
@@ -55,7 +57,7 @@ class MaskedDataloader(SeqIODataloader):
                         continue
 
                     self.repeat_details.append( (str(file), record.id, start+1, end) )
-                    batch.append(dna_seq_to_tensor(repeat.group(0)))
+                    batch.append(dna_seq_to_tensor(repeat.group(0).upper()))
 
                     if len(batch) >= self.batch_size:
                         batch = self.pad(batch)

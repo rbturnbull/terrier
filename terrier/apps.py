@@ -15,7 +15,6 @@ from hierarchicalsoftmax import HierarchicalSoftmaxLoss, SoftmaxNode
 from hierarchicalsoftmax import metrics, inference
 import csv
 import torch
-from .famdb import FamDB
 from corgi.tensor import dna_seq_to_tensor
 from corgi.models import ConvClassifier
 from fastcore.foundation import mask2idxs
@@ -23,6 +22,8 @@ from fastai.data.transforms import IndexSplitter
 from rich.progress import track
 from fastai.metrics import accuracy
 
+from .famdb import FamDB
+from .dataloaders import MaskedDataloader
 
 def greedy_attribute_accuracy(prediction_tensor, target_tensor, root, attribute):
     prediction_nodes = inference.greedy_predictions(prediction_tensor=prediction_tensor, root=root)
@@ -259,7 +260,10 @@ class Terrier(FamDBObject, ta.TorchApp):
             splitter=splitter,
         )
 
-        return datablock.dataloaders(accessions, bs=batch_size)
+        dls = datablock.dataloaders(accessions, bs=batch_size)
+        if self.repeatmasker_only:
+            self.vocab = dls.vocab
+        return dls
 
     def loss_func(self):
         if self.repeatmasker_only:
@@ -349,7 +353,7 @@ class Terrier(FamDBObject, ta.TorchApp):
         Returns:
             nn.Module: The created model.
         """
-        output_size = len(self.repeatmasker_type_dict.keys()) if self.repeatmasker_only else self.classification_tree.layer_size
+        output_size = len(self.vocab) if self.repeatmasker_only else self.classification_tree.layer_size
         if corgi:
             corgi_learner = load_learner(corgi)
             final_in_features = list(corgi_learner.model.final.modules())[1].in_features
@@ -388,7 +392,7 @@ class Terrier(FamDBObject, ta.TorchApp):
         batch_size:int = 1,
         **kwargs,
     ):
-        self.masked_dataloader = dataloaders.MaskedDataloader(files=file, device=learner.dls.device, batch_size=batch_size, min_length=64, max_seqs=max_seqs)
+        self.masked_dataloader = MaskedDataloader(files=file, format="fasta", device=learner.dls.device, batch_size=batch_size, min_length=128, max_seqs=max_seqs)
         self.categories = learner.dls.vocab
         return self.masked_dataloader
 
@@ -398,7 +402,8 @@ class Terrier(FamDBObject, ta.TorchApp):
         csv: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
         **kwargs,
     ):
-        repeat_details = pd.DataFrame(self.repeat_details, columns=["file", "accession", "start", "end"])
+        breakpoint()
+        repeat_details = pd.DataFrame(self.masked_dataloader.repeat_details, columns=["file", "accession", "start", "end"])
         predictions_df = pd.DataFrame(results[0].numpy(), columns=self.categories)
         results_df = pd.concat(
             [repeat_details, predictions_df],
