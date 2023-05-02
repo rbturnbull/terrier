@@ -1,6 +1,4 @@
-================================================================
-Terrier
-================================================================
+.. image:: https://raw.githubusercontent.com/rbturnbull/terrier/main/docs/images/terrier-banner.svg
 
 .. start-badges
 
@@ -25,7 +23,7 @@ Terrier
 
 .. start-quickstart
 
-Classifier of Repeats
+Transposable Element Repeat Result classifIER
 
 Installation
 ==================================
@@ -64,6 +62,8 @@ Robert Turnbull
 For more information contact: <robert.turnbull@unimelb.edu.au>
 
 Created using torchapp (https://github.com/rbturnbull/torchapp).
+
+Logo adapted from https://thenounproject.com/icon/yorkshire-terrier-4285262/
 
 .. end-credits
 
