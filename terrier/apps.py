@@ -1,5 +1,6 @@
 import pandas as pd
 from typing import List
+import random
 from functools import partial
 from pathlib import Path
 from torch import nn
@@ -7,7 +8,7 @@ from fastai.data.core import DataLoaders
 import torchapp as ta
 from fastai.learner import load_learner
 from rich.console import Console
-from fastai.data.block import DataBlock, TransformBlock
+from fastai.data.block import DataBlock, TransformBlock, CategoryBlock
 from fastai.data.transforms import RandomSplitter
 console = Console()
 from hierarchicalsoftmax import HierarchicalSoftmaxLoss, SoftmaxNode
@@ -19,7 +20,8 @@ from corgi.tensor import dna_seq_to_tensor
 from corgi.models import ConvClassifier
 from fastcore.foundation import mask2idxs
 from fastai.data.transforms import IndexSplitter
-from . import dataloaders
+from rich.progress import track
+from fastai.metrics import accuracy
 
 
 def greedy_attribute_accuracy(prediction_tensor, target_tensor, root, attribute):
@@ -135,7 +137,9 @@ class Terrier(FamDBObject, ta.TorchApp):
         famdb:Path = ta.Param(help="The FamDB file (hdf5) input file from Dfam."), 
         batch_size:int = ta.Param(default=1, help="The batch size."),
         max_count:int = ta.Param(default=None, help="The maximum number of families to train with. Default unlimited."),
-        validation:Path = ta.Param(default=None, help="The path to a list of accessions to use as validation.")
+        training:Path = ta.Param(default=None, help="The path to a list of accessions to use for training."),
+        validation:Path = ta.Param(default=None, help="The path to a list of accessions to use as validation."),
+        repeatmasker_only:bool = False,
     ) -> DataLoaders:
         """
         Creates a FastAI DataLoaders object which Terrier uses in training and prediction.
@@ -147,12 +151,83 @@ class Terrier(FamDBObject, ta.TorchApp):
         Returns:
             DataLoaders: The DataLoaders object.
         """
+        print("Reading Dfam")
         self.famdb = FamDB(famdb)
+        print("Done")
         self.accession_to_node_id = {}
+        self.accession_to_repeatmasker_type = {}
 
-        accessions = []
+        accessions = set()
+
+
+        ########hack
+        # with open("category.csv", "w") as csv:
+        #     print("accession", "curated", "node_id", "length", file=csv, sep=",", flush=True)
+
+        #     print('open')
+        #     validation_accessions = set(Path(validation).read_text().strip().split("\n"))
+        #     print('validation_accessions', len(validation_accessions))
+        #     for accession in self.famdb.get_family_accessions():
+        #         print(accession)
+        #         if accession in accessions:
+        #             continue
+        #         family = self.famdb.get_family_by_accession(accession)
+        #         if not hasattr(family, "classification") or not family.classification:
+        #             continue
+
+        #         classification = family.classification.replace("root;","")
+        #         assert classification
+        #         assert classification in self.classification_nodes
+        #         node = self.classification_nodes[classification]
+        #         node_id = self.classification_tree.node_to_id[node]
+        #         # self.accession_to_node_id[accession] = node_id
+        #         self.accession_to_repeatmasker_type[accession] = node.repeat_masker_type
+        #         print(accession, node_id, accession in validation_accessions, node_id, family.length, file=csv, sep=",", flush=True)
+        # assert False
+
+        # with open("repeatmasker_type.csv", "w") as csv:
+        #     print("accession", "repeat_masker_type", "validation", "node_id", "length", file=csv, sep=",", flush=True)
+
+        #     print('open')
+        #     validation_accessions = set(Path(validation).read_text().strip().split("\n"))
+        #     print('validation_accessions', len(validation_accessions))
+        #     for accession in self.famdb.get_family_accessions():
+        #         print(accession)
+        #         if accession in accessions:
+        #             continue
+        #         family = self.famdb.get_family_by_accession(accession)
+        #         if not hasattr(family, "classification") or not family.classification:
+        #             continue
+        #         # if family.length < 64:
+        #         #     continue
+        #         classification = family.classification.replace("root;","")
+        #         assert classification
+        #         assert classification in self.classification_nodes
+        #         node = self.classification_nodes[classification]
+        #         node_id = self.classification_tree.node_to_id[node]
+        #         # self.accession_to_node_id[accession] = node_id
+        #         self.accession_to_repeatmasker_type[accession] = node.repeat_masker_type
+        #         print(accession, node.repeat_masker_type, accession in validation_accessions, node_id, family.length, file=csv, sep=",", flush=True)
+        # assert False
+        ########hack
         
-        for accession in self.famdb.get_family_accessions():
+        print("Getting list of accessions")
+        if training:
+            accessions_to_try = Path(training).read_text().strip().split("\n")
+        else:
+            accessions_to_try = list(self.famdb.get_family_accessions())
+
+        if validation:
+            if max_count:
+                # if we are limiting the number of training items, then shuffle the list to make it a random sample
+                random.seed(42)
+                random.shuffle(accessions_to_try)
+            validation_accessions = set(Path(validation).read_text().strip().split("\n"))
+            accessions_to_try = list(validation_accessions) + accessions_to_try
+
+        for accession in track(accessions_to_try, "Looking up accessions:"):
+            if accession in accessions:
+                continue
             family = self.famdb.get_family_by_accession(accession)
             if not hasattr(family, "classification") or not family.classification:
                 continue
@@ -164,30 +239,37 @@ class Terrier(FamDBObject, ta.TorchApp):
             node = self.classification_nodes[classification]
             node_id = self.classification_tree.node_to_id[node]
             self.accession_to_node_id[accession] = node_id
+            self.accession_to_repeatmasker_type[accession] = node.repeat_masker_type
             
-            accessions.append(accession)
+            accessions.add(accession)
             if max_count and len(accessions) >= max_count:
+                print(f"Stopping at {max_count} accessions")
                 break
 
-        if validation:
-            validation_accessions = Path(validation).read_text().strip().split("\n")
-            splitter = SetSplitter(validation_accessions)
-        else:
-            splitter = RandomSplitter()
+        splitter = SetSplitter(validation_accessions) if validation else RandomSplitter()
 
+        get_x = SequenceGetter(famdb=self.famdb)
+        blocks = [TransformBlock, CategoryBlock if repeatmasker_only else TransformBlock]
+        get_y = DictionaryGetter(self.accession_to_repeatmasker_type if repeatmasker_only else self.accession_to_node_id)
+        self.repeatmasker_only = repeatmasker_only
         datablock = DataBlock(
-            blocks=[TransformBlock, TransformBlock],
-            get_x=SequenceGetter(famdb=self.famdb),
-            get_y=DictionaryGetter(self.accession_to_node_id),
+            blocks=blocks,
+            get_x=get_x,
+            get_y=get_y,
             splitter=splitter,
         )
 
         return datablock.dataloaders(accessions, bs=batch_size)
 
     def loss_func(self):
+        if self.repeatmasker_only:
+            return nn.CrossEntropyLoss()
         return HierarchicalSoftmaxLoss(root=self.classification_tree)
 
     def metrics(self):
+        if self.repeatmasker_only:
+            return [accuracy]
+
         return [
             partial(metrics.greedy_accuracy, root=self.classification_tree), 
             partial(metrics.greedy_f1_score, root=self.classification_tree),
@@ -267,13 +349,16 @@ class Terrier(FamDBObject, ta.TorchApp):
         Returns:
             nn.Module: The created model.
         """
+        output_size = len(self.repeatmasker_type_dict.keys()) if self.repeatmasker_only else self.classification_tree.layer_size
         if corgi:
             corgi_learner = load_learner(corgi)
             final_in_features = list(corgi_learner.model.final.modules())[1].in_features
+
+            
             corgi_learner.model.final = nn.Sequential(
                 nn.Linear(in_features=final_in_features, out_features=final_in_features, bias=True),
                 nn.ReLU(),
-                nn.Linear(in_features=final_in_features, out_features=self.classification_tree.layer_size, bias=final_bias),
+                nn.Linear(in_features=final_in_features, out_features=output_size, bias=final_bias),
             )
             return corgi_learner.model
 
@@ -282,7 +367,7 @@ class Terrier(FamDBObject, ta.TorchApp):
             kernel_size=kernel_size,
             factor=factor,
             cnn_layers=cnn_layers,
-            num_classes=self.classification_tree.layer_size,
+            num_classes=output_size,
             kernel_size_maxpool=kernel_size_maxpool,
             final_bias=final_bias,
             dropout=dropout,
@@ -290,6 +375,9 @@ class Terrier(FamDBObject, ta.TorchApp):
         )
 
     def monitor(self):
+        self.repeatmasker_only = True # HACK
+        if self.repeatmasker_only:
+            return "accuracy"
         return "greedy_f1_score"
 
     def inference_dataloader(
