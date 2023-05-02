@@ -53,7 +53,7 @@ class MaskedDataloader(SeqIODataloader):
                     if end - start < self.min_length:
                         continue
 
-                    self.repeat_details.append( (str(file), record.id, start, end) )
+                    self.repeat_details.append( (str(file), record.id, start+1, end) )
                     batch.append(dna_seq_to_tensor(repeat.group(0)))
 
                     if len(batch) >= self.batch_size:
