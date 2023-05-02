@@ -1,3 +1,5 @@
+import pandas as pd
+from typing import List
 from functools import partial
 from pathlib import Path
 from torch import nn
@@ -17,7 +19,7 @@ from corgi.tensor import dna_seq_to_tensor
 from corgi.models import ConvClassifier
 from fastcore.foundation import mask2idxs
 from fastai.data.transforms import IndexSplitter
-
+from . import dataloaders
 
 
 def greedy_attribute_accuracy(prediction_tensor, target_tensor, root, attribute):
@@ -290,10 +292,35 @@ class Corkie(FamDBObject, ta.TorchApp):
     def monitor(self):
         return "greedy_f1_score"
 
-    def output_results(
-        self, 
-        results, 
-        **kwargs
+    def inference_dataloader(
+        self,
+        learner,
+        file: List[Path] = ta.Param(None, help="A fasta file with sequences to be classified."),
+        max_seqs: int = None,
+        batch_size:int = 1,
+        **kwargs,
     ):
-        print(results)
-        return results
+        self.masked_dataloader = dataloaders.MaskedDataloader(files=file, device=learner.dls.device, batch_size=batch_size, min_length=64, max_seqs=max_seqs)
+        self.categories = learner.dls.vocab
+        return self.masked_dataloader
+
+    def output_results(
+        self,
+        results,
+        csv: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
+        **kwargs,
+    ):
+        repeat_details = pd.DataFrame(self.repeat_details, columns=["file", "accession", "start", "end"])
+        predictions_df = pd.DataFrame(results[0].numpy(), columns=self.categories)
+        results_df = pd.concat(
+            [repeat_details, predictions_df],
+            axis=1,
+        )
+        results_df['prediction'] = results_df[self.categories].idxmax(axis=1)
+        if csv:
+            console.print(f"Writing results for {len(results_df)} repeats to: {csv}")
+            results_df.to_csv(csv, index=False)
+        else:
+            print("No output file given.")
+
+        return results_df
