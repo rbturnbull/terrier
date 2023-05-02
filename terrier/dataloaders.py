@@ -1,8 +1,9 @@
 import re
 from pathlib import Path
 from Bio import SeqIO
-from corgi.transforms import PadBatchX, dna_seq_to_tensor
+from corgi.transforms import PadBatchX
 from corgi.dataloaders import SeqIODataloader
+from corgi.tensor import dna_seq_to_tensor
 
 
 class MaskedDataloader(SeqIODataloader):
