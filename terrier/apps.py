@@ -402,7 +402,6 @@ class Terrier(FamDBObject, ta.TorchApp):
         csv: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
         **kwargs,
     ):
-        breakpoint()
         repeat_details = pd.DataFrame(self.masked_dataloader.repeat_details, columns=["file", "accession", "start", "end"])
         predictions_df = pd.DataFrame(results[0].numpy(), columns=self.categories)
         results_df = pd.concat(
