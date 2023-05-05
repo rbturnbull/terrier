@@ -22,6 +22,7 @@ from fastai.data.transforms import IndexSplitter
 from rich.progress import track
 from fastai.metrics import accuracy
 
+from .loss import FocalLoss
 from .famdb import FamDB
 from .dataloaders import MaskedDataloader
 
@@ -265,9 +266,12 @@ class Terrier(FamDBObject, ta.TorchApp):
             self.vocab = dls.vocab
         return dls
 
-    def loss_func(self):
+    def loss_func(self,gamma:float=0.0):
         if self.repeatmasker_only:
-            return nn.CrossEntropyLoss()
+            if gamma == 0.0:
+                return nn.CrossEntropyLoss()
+            else:
+                return FocalLoss(gamma=gamma)
         return HierarchicalSoftmaxLoss(root=self.classification_tree)
 
     def metrics(self):
