@@ -21,6 +21,7 @@ from fastcore.foundation import mask2idxs
 from fastai.data.transforms import IndexSplitter
 from rich.progress import track
 from fastai.metrics import accuracy
+from torchapp.apps import call_func
 
 from .loss import FocalLoss
 from .famdb import FamDB
@@ -420,3 +421,30 @@ class Terrier(FamDBObject, ta.TorchApp):
             print("No output file given.")
 
         return results_df
+
+    def __call__(
+        self, 
+        gpu: bool = ta.Param(True, help="Whether or not to use a GPU for processing if available."), 
+        vector: bool = ta.Param(False, help="Whether or not to save the penultimate layer activations as a vector."), 
+        **kwargs
+    ):
+        # Check if CUDA is available
+        gpu = gpu and torch.cuda.is_available()
+
+        # Open the exported learner from a pickle file
+        path = call_func(self.pretrained_local_path, **kwargs)
+        learner = self.learner_obj = load_learner(path, cpu=not gpu)
+
+        # Create a dataloader for inference
+        dataloader = call_func(self.inference_dataloader, learner, **kwargs)
+
+        self.vector = vector
+        if vector:
+            # adapt the model
+            learner.model.logits = nn.Identity()
+
+        results = learner.get_preds(dl=dataloader, reorder=False, with_decoded=False, act=self.activation(), cbs=self.inference_callbacks())
+
+        # Output results
+        output_results = call_func(self.output_results, results, **kwargs)
+        return output_results if output_results is not None else results
