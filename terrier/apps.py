@@ -408,12 +408,15 @@ class Terrier(FamDBObject, ta.TorchApp):
         **kwargs,
     ):
         repeat_details = pd.DataFrame(self.masked_dataloader.repeat_details, columns=["file", "accession", "start", "end"])
-        predictions_df = pd.DataFrame(results[0].numpy(), columns=self.categories)
+        results = torch.softmax(results[0], axis=1)
+        predictions_df = pd.DataFrame(results.numpy(), columns=self.categories)
         results_df = pd.concat(
             [repeat_details, predictions_df],
             axis=1,
         )
         results_df['prediction'] = results_df[self.categories].idxmax(axis=1)
+        results_df["prediction_exclude_unknown"] = results_df[[c for c in self.categories if c != "Unknown"]].idxmax(axis=1)
+
         if csv:
             console.print(f"Writing results for {len(results_df)} repeats to: {csv}")
             results_df.to_csv(csv, index=False)
