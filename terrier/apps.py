@@ -21,7 +21,9 @@ from fastcore.foundation import mask2idxs
 from fastai.data.transforms import IndexSplitter
 from rich.progress import track
 from fastai.metrics import accuracy
+import xarray as xr
 from torchapp.apps import call_func
+from .models import VectorOutput
 
 from .loss import FocalLoss
 from .famdb import FamDB
@@ -404,12 +406,17 @@ class Terrier(FamDBObject, ta.TorchApp):
     def output_results(
         self,
         results,
-        csv: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
+        output_file: Path = ta.Param(default=None, help="A path to output the results."),
         **kwargs,
     ):
+        if self.vector:
+            classification_results = results[0][0]
+        else:
+            classification_results = results[0]
+        
         repeat_details = pd.DataFrame(self.masked_dataloader.repeat_details, columns=["file", "accession", "start", "end"])
-        results = torch.softmax(results[0], axis=1)
-        predictions_df = pd.DataFrame(results.numpy(), columns=self.categories)
+        classification_probabilities = torch.softmax(classification_results, axis=1)
+        predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=self.categories)
         results_df = pd.concat(
             [repeat_details, predictions_df],
             axis=1,
@@ -417,11 +424,19 @@ class Terrier(FamDBObject, ta.TorchApp):
         results_df['prediction'] = results_df[self.categories].idxmax(axis=1)
         results_df["prediction_exclude_unknown"] = results_df[[c for c in self.categories if c != "Unknown"]].idxmax(axis=1)
 
-        if csv:
-            console.print(f"Writing results for {len(results_df)} repeats to: {csv}")
-            results_df.to_csv(csv, index=False)
+        if output_file:
+            console.print(f"Writing results for {len(results_df)} repeats to: {output_file}")
+            results_df.to_csv(output_file, index=False)
         else:
             print("No output file given.")
+
+        if self.vector:
+            # x = results_df.to_xarray()
+            # breakpoint()
+            # embeddings = xr.DataArray(results[0][1], dims=("accession", "embedding"))
+            # embeddings.to_netcdf("embeddings.nc")
+            torch.save(results[0][1], "embeddings.pkl")
+
 
         return results_df
 
@@ -444,7 +459,7 @@ class Terrier(FamDBObject, ta.TorchApp):
         self.vector = vector
         if vector:
             # adapt the model
-            learner.model.logits = nn.Identity()
+            learner.model.final = VectorOutput(learner.model.final)
 
         results = learner.get_preds(dl=dataloader, reorder=False, with_decoded=False, act=self.activation(), cbs=self.inference_callbacks())
 
