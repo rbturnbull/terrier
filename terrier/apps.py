@@ -96,6 +96,40 @@ class Terrier(FamDBObject, ta.TorchApp):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def render_classification_tree(self):
+        try:
+            text_file = Path("classification_tree.txt")
+            text_file.write_text(str(self.classification_tree.render()))
+            self.classification_tree.render(filepath="classification_tree.svg")
+            self.classification_tree.render(filepath="classification_tree.png")
+        except Exception as err:
+            print(f"Cannot render classification tree {err}")
+
+    def setup_repbase_classification_tree(self, label_smoothing=0.0):
+        self.classification_tree = SoftmaxNode(name="root", label_smoothing=label_smoothing)
+        self.classification_nodes = {}
+        
+        prev = self.classification_tree
+        parent = self.classification_tree
+        indentation = 0
+        with open(Path(__file__).parent/"data/repbase.tree.txt") as f:
+            for line in f:
+                my_indent = line.count("\t")
+                if my_indent > indentation:
+                    assert my_indent == indentation + 1
+                    parent = prev
+                    indentation = my_indent
+                elif my_indent < indentation:
+                    while my_indent < indentation:
+                        parent = parent.parent
+                        indentation -= 1
+                name = line.strip()
+                prev = SoftmaxNode(name, parent=parent, count=0, label_smoothing=label_smoothing)
+                self.classification_nodes[name] = prev
+        self.classification_tree.set_indexes()
+
+    def setup_dfam_classification_tree(self):
         self.classification_tree = SoftmaxNode(name="root")
         self.classification_nodes = {}
         self.repeatmasker_types = []
@@ -129,21 +163,15 @@ class Terrier(FamDBObject, ta.TorchApp):
 
         self.classification_tree.set_indexes()
 
-        try:
-            text_file = Path("classification_tree.txt")
-            text_file.write_text(str(self.classification_tree.render()))
-            self.classification_tree.render(filepath="classification_tree.svg")
-            self.classification_tree.render(filepath="classification_tree.png")
-        except Exception as err:
-            print(f"Cannot render classification tree {err}")
-
     def dataloaders(
         self,
+        repbase:Path = ta.Param(None, help="RepBase in FASTA format."), 
         famdb:Path = ta.Param(help="The FamDB file (hdf5) input file from Dfam."), 
         batch_size:int = ta.Param(default=1, help="The batch size."),
         max_count:int = ta.Param(default=None, help="The maximum number of families to train with. Default unlimited."),
         training:Path = ta.Param(default=None, help="The path to a list of accessions to use for training."),
         validation:Path = ta.Param(default=None, help="The path to a list of accessions to use as validation."),
+        label_smoothing:float = ta.Param(default=0.0, min=0.0, max=1.0, help="The amount of label smoothing to use."),
         repeatmasker_only:bool = False,
     ) -> DataLoaders:
         """
@@ -156,9 +184,20 @@ class Terrier(FamDBObject, ta.TorchApp):
         Returns:
             DataLoaders: The DataLoaders object.
         """
-        print("Reading Dfam")
-        self.famdb = FamDB(famdb)
+        if repbase:
+            print("Reading RepBase")
+            from .repbase import RepBase, RepBaseGetter
+            self.repbase = RepBase(repbase)
+            self.setup_repbase_classification_tree(label_smoothing=label_smoothing)
+            get_x = RepBaseGetter(self.repbase)
+        else:
+            self.repbase = None
+            self.setup_dfam_classification_tree()
+            print("Reading Dfam")
+            self.famdb = FamDB(famdb)
+            get_x = SequenceGetter(self.famdb)
         print("Done")
+
         self.accession_to_node_id = {}
         self.accession_to_repeatmasker_type = {}
 
@@ -230,21 +269,33 @@ class Terrier(FamDBObject, ta.TorchApp):
             validation_accessions = set(Path(validation).read_text().strip().split("\n"))
             accessions_to_try = list(validation_accessions) + accessions_to_try
 
-        for accession in track(accessions_to_try, "Looking up accessions:"):
+        for accession in accessions_to_try:
+        # for accession in track(accessions_to_try, "Looking up accessions:"):
             if accession in accessions:
                 continue
-            family = self.famdb.get_family_by_accession(accession)
-            if not hasattr(family, "classification") or not family.classification:
-                continue
-            if family.length < 64:
-                continue
-            classification = family.classification.replace("root;","")
-            assert classification
-            assert classification in self.classification_nodes
-            node = self.classification_nodes[classification]
-            node_id = self.classification_tree.node_to_id[node]
-            self.accession_to_node_id[accession] = node_id
-            self.accession_to_repeatmasker_type[accession] = node.repeat_masker_type
+
+            if self.repbase:
+                record = self.repbase[accession]
+                classification = record.description.split("\t")[1]
+                if classification not in self.classification_nodes:
+                    print("classification not in list")
+                    assert False
+                node = self.classification_nodes[classification]
+                node_id = self.classification_tree.node_to_id[node]
+                self.accession_to_node_id[accession] = node_id
+            else:
+                family = self.famdb.get_family_by_accession(accession)
+                if not hasattr(family, "classification") or not family.classification:
+                    continue
+                if family.length < 64:
+                    continue
+                classification = family.classification.replace("root;","")
+                assert classification
+                assert classification in self.classification_nodes
+                node = self.classification_nodes[classification]
+                node_id = self.classification_tree.node_to_id[node]
+                self.accession_to_node_id[accession] = node_id
+                self.accession_to_repeatmasker_type[accession] = node.repeat_masker_type
             
             accessions.add(accession)
             if max_count and len(accessions) >= max_count:
@@ -253,7 +304,6 @@ class Terrier(FamDBObject, ta.TorchApp):
 
         splitter = SetSplitter(validation_accessions) if validation else RandomSplitter()
 
-        get_x = SequenceGetter(famdb=self.famdb)
         blocks = [TransformBlock, CategoryBlock if repeatmasker_only else TransformBlock]
         get_y = DictionaryGetter(self.accession_to_repeatmasker_type if repeatmasker_only else self.accession_to_node_id)
         self.repeatmasker_only = repeatmasker_only
@@ -286,7 +336,7 @@ class Terrier(FamDBObject, ta.TorchApp):
             partial(metrics.greedy_f1_score, root=self.classification_tree),
             partial(metrics.greedy_accuracy_depth_one, root=self.classification_tree), 
             partial(metrics.greedy_accuracy_depth_two, root=self.classification_tree), 
-            partial(greedy_attribute_accuracy, root=self.classification_tree, attribute="repeat_masker_type_id"), 
+            # partial(greedy_attribute_accuracy, root=self.classification_tree, attribute="repeat_masker_type_id"), 
         ]
 
     def model(
@@ -386,9 +436,9 @@ class Terrier(FamDBObject, ta.TorchApp):
         )
 
     def monitor(self):
-        self.repeatmasker_only = True # HACK
-        if self.repeatmasker_only:
-            return "accuracy"
+        # self.repeatmasker_only = True # HACK
+        # if self.repeatmasker_only:
+        #     return "accuracy"
         return "greedy_f1_score"
 
     def inference_dataloader(
