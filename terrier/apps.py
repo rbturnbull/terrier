@@ -106,8 +106,8 @@ class Terrier(FamDBObject, ta.TorchApp):
         except Exception as err:
             print(f"Cannot render classification tree {err}")
 
-    def setup_repbase_classification_tree(self, label_smoothing=0.0):
-        self.classification_tree = SoftmaxNode(name="root", label_smoothing=label_smoothing)
+    def setup_repbase_classification_tree(self, label_smoothing=0.0, gamma=None):
+        self.classification_tree = SoftmaxNode(name="root", label_smoothing=label_smoothing, gamma=gamma)
         self.classification_nodes = {}
         
         prev = self.classification_tree
@@ -125,7 +125,7 @@ class Terrier(FamDBObject, ta.TorchApp):
                         parent = parent.parent
                         indentation -= 1
                 name = line.strip()
-                prev = SoftmaxNode(name, parent=parent, count=0, label_smoothing=label_smoothing)
+                prev = SoftmaxNode(name, parent=parent, count=0, label_smoothing=label_smoothing, gamma=gamma)
                 self.classification_nodes[name] = prev
         self.classification_tree.set_indexes()
 
@@ -172,6 +172,7 @@ class Terrier(FamDBObject, ta.TorchApp):
         training:Path = ta.Param(default=None, help="The path to a list of accessions to use for training."),
         validation:Path = ta.Param(default=None, help="The path to a list of accessions to use as validation."),
         label_smoothing:float = ta.Param(default=0.0, min=0.0, max=1.0, help="The amount of label smoothing to use."),
+        gamma:float = ta.Param(default=None, min=0.0, help="The gamma value for using Focal Loss."),
         repeatmasker_only:bool = False,
     ) -> DataLoaders:
         """
@@ -188,7 +189,7 @@ class Terrier(FamDBObject, ta.TorchApp):
             print("Reading RepBase")
             from .repbase import RepBase, RepBaseGetter
             self.repbase = RepBase(repbase)
-            self.setup_repbase_classification_tree(label_smoothing=label_smoothing)
+            self.setup_repbase_classification_tree(label_smoothing=label_smoothing, gamma=gamma)
             get_x = RepBaseGetter(self.repbase)
         else:
             self.repbase = None
