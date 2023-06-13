@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 from typing import List
 import random
@@ -12,7 +13,7 @@ from fastai.data.block import DataBlock, TransformBlock, CategoryBlock
 from fastai.data.transforms import RandomSplitter
 console = Console()
 from hierarchicalsoftmax import HierarchicalSoftmaxLoss, SoftmaxNode
-from hierarchicalsoftmax import metrics, inference
+from hierarchicalsoftmax import metrics, inference, greedy_predictions
 import csv
 import torch
 from corgi.tensor import dna_seq_to_tensor
@@ -445,18 +446,22 @@ class Terrier(FamDBObject, ta.TorchApp):
     def inference_dataloader(
         self,
         learner,
-        file: List[Path] = ta.Param(None, help="A fasta file with sequences to be classified."),
+        fasta: List[Path] = ta.Param(None, help="A fasta file with sequences to be classified."),
         max_seqs: int = None,
+        max_repeats:int = None,
         batch_size:int = 1,
         **kwargs,
     ):
-        self.masked_dataloader = MaskedDataloader(files=file, format="fasta", device=learner.dls.device, batch_size=batch_size, min_length=128, max_seqs=max_seqs)
-        self.categories = learner.dls.vocab
+        self.masked_dataloader = MaskedDataloader(files=fasta, format="fasta", device=learner.dls.device, batch_size=batch_size, min_length=128, max_seqs=max_seqs, max_repeats=max_repeats)
+        # only works for repbase
+        self.setup_repbase_classification_tree()
         return self.masked_dataloader
 
     def output_results(
         self,
         results,
+        repeat_masker_out:Path = ta.Param(default=None, help="The .out file from repeat masker."),
+        repeat_masker_replace:Path = ta.Param(default=None, help="A path to write a replacement repeat masker out file."),
         output_file: Path = ta.Param(default=None, help="A path to output the results."),
         **kwargs,
     ):
@@ -466,30 +471,61 @@ class Terrier(FamDBObject, ta.TorchApp):
             classification_results = results[0]
         
         repeat_details = pd.DataFrame(self.masked_dataloader.repeat_details, columns=["file", "accession", "start", "end"])
-        classification_probabilities = torch.softmax(classification_results, axis=1)
-        predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=self.categories)
-        results_df = pd.concat(
-            [repeat_details, predictions_df],
-            axis=1,
-        )
-        results_df['prediction'] = results_df[self.categories].idxmax(axis=1)
-        results_df["prediction_exclude_unknown"] = results_df[[c for c in self.categories if c != "Unknown"]].idxmax(axis=1)
+        prediction_nodes = inference.greedy_predictions(classification_results, root=self.classification_tree)
+        repeat_details["category"] = prediction_nodes
+        repeat_details["hierarchical_classification"] = [" > ".join([str(anc) for anc in node.ancestors[1:] + (str(node),) ]) for node in prediction_nodes]
+
+        # current_node = 0
+        # with open(repeat_masker_out, "r") as f, open(repeat_masker_replace, "w") as out:
+        #     for line_number, line in enumerate(f):
+        #         if line_number >= 3: # after header
+        #             m = re.match(r"^\s*(\S+\s+){11}", line)
+        #             if m is None:
+        #                 breakpoint()
+        #             start, stop = m.span(1)
+        #             prediction = str(prediction_nodes[current_node])
+
+        #             # error checking 
+        #             m = re.match(r"^\s*(\S+\s+){5}(\d+)\s+(\d+)", line)
+        #             assert m is not None
+        #             seq_start = int(m.group(2))
+        #             seq_end = int(m.group(3))
+        #             if seq_start != self.masked_dataloader.repeat_details[current_node][2]:
+        #                 breakpoint()
+        #             # if seq_end != self.masked_dataloader.repeat_details[current_node][3]:
+        #             #     breakpoint()
+
+        #             line = line[:start] + prediction + " "*(stop-start-len(prediction)) + line[stop:]
+        #             current_node += 1
+
+        #         out.write(line)
+        #         if current_node >= len(prediction_nodes):
+        #             break
+
+        # classification_probabilities = torch.softmax(classification_results, axis=1)
+        # predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=self.categories)
+        # results_df = pd.concat(
+        #     [repeat_details, predictions_df],
+        #     axis=1,
+        # )
+        # results_df['prediction'] = results_df[self.categories].idxmax(axis=1)
+        # results_df["prediction_exclude_unknown"] = results_df[[c for c in self.categories if c != "Unknown"]].idxmax(axis=1)
 
         if output_file:
-            console.print(f"Writing results for {len(results_df)} repeats to: {output_file}")
-            results_df.to_csv(output_file, index=False)
+            console.print(f"Writing results for {len(repeat_details)} repeats to: {output_file}")
+            repeat_details.to_csv(output_file, index=False)
         else:
             print("No output file given.")
 
-        if self.vector:
-            # x = results_df.to_xarray()
-            # breakpoint()
-            # embeddings = xr.DataArray(results[0][1], dims=("accession", "embedding"))
-            # embeddings.to_netcdf("embeddings.nc")
-            torch.save(results[0][1], "embeddings.pkl")
+        # if self.vector:
+        #     # x = results_df.to_xarray()
+        #     # breakpoint()
+        #     # embeddings = xr.DataArray(results[0][1], dims=("accession", "embedding"))
+        #     # embeddings.to_netcdf("embeddings.nc")
+        #     torch.save(results[0][1], "embeddings.pkl")
 
 
-        return results_df
+        return prediction_nodes
 
     def __call__(
         self, 
