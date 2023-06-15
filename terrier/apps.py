@@ -18,8 +18,10 @@ import csv
 import torch
 from corgi.tensor import dna_seq_to_tensor
 from corgi.models import ConvClassifier
+from corgi.dataloaders import SeqIODataloader
 from fastcore.foundation import mask2idxs
 from fastai.data.transforms import IndexSplitter
+from Bio import SeqIO
 from rich.progress import track
 from fastai.metrics import accuracy
 import xarray as xr
@@ -448,21 +450,30 @@ class Terrier(FamDBObject, ta.TorchApp):
         learner,
         fasta: List[Path] = ta.Param(None, help="A fasta file with sequences to be classified."),
         max_seqs: int = None,
-        max_repeats:int = None,
+        max_length:int=25_000,
         batch_size:int = 1,
         **kwargs,
-    ):
-        self.masked_dataloader = MaskedDataloader(files=fasta, format="fasta", device=learner.dls.device, batch_size=batch_size, min_length=128, max_seqs=max_seqs, max_repeats=max_repeats)
+    ):        
+        self.dataloader = SeqIODataloader(
+            files=fasta, 
+            device=learner.dls.device, 
+            batch_size=batch_size, 
+            min_length=1,
+            max_length=max_length,
+            max_seqs=max_seqs,
+        )
+        # self.masked_dataloader = MaskedDataloader(files=fasta, format="fasta", device=learner.dls.device, batch_size=batch_size, min_length=128, max_seqs=max_seqs, max_repeats=max_repeats)
         # only works for repbase
         self.setup_repbase_classification_tree()
-        return self.masked_dataloader
+        return self.dataloader
 
     def output_results(
         self,
         results,
         repeat_masker_out:Path = ta.Param(default=None, help="The .out file from repeat masker."),
         repeat_masker_replace:Path = ta.Param(default=None, help="A path to write a replacement repeat masker out file."),
-        output_file: Path = ta.Param(default=None, help="A path to output the results."),
+        output_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
+        output_fasta: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
         **kwargs,
     ):
         if self.vector:
@@ -470,10 +481,30 @@ class Terrier(FamDBObject, ta.TorchApp):
         else:
             classification_results = results[0]
         
-        repeat_details = pd.DataFrame(self.masked_dataloader.repeat_details, columns=["file", "accession", "start", "end"])
-        prediction_nodes = inference.greedy_predictions(classification_results, root=self.classification_tree)
-        repeat_details["category"] = prediction_nodes
-        repeat_details["hierarchical_classification"] = [" > ".join([str(anc) for anc in node.ancestors[1:] + (str(node),) ]) for node in prediction_nodes]
+        classification_probabilities = inference.leaf_probabilities(results[0], root=self.classification_tree)
+        chunk_details = pd.DataFrame(self.dataloader.chunk_details, columns=["file", "accession", "chunk"])
+        category_names = [str(node) for node in self.classification_tree.leaves]
+        predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=category_names)
+        results_df = pd.concat(
+            [chunk_details.drop(columns=['chunk']), predictions_df],
+            axis=1,
+        )
+
+        # Average over chunks
+        results_df = results_df.groupby(["file", "accession"]).mean().reset_index()
+        results_df['prediction'] = results_df[category_names].idxmax(axis=1)
+
+        if output_fasta:
+            with open(output_fasta, "w") as fasta_out:
+                for file in self.dataloader.files:
+                    for record in SeqIO.parse(file, "fasta"):
+                        SeqIO.write(record, fasta_out, "fasta")
+
+
+        # repeat_details = pd.DataFrame(self.dataloader.repeat_details, columns=["file", "accession", "start", "end"])
+        # prediction_nodes = inference.greedy_predictions(classification_results, root=self.classification_tree)
+        # repeat_details["category"] = prediction_nodes
+        # repeat_details["hierarchical_classification"] = [" > ".join([str(anc) for anc in node.ancestors[1:] + (str(node),) ]) for node in prediction_nodes]
 
         # current_node = 0
         # with open(repeat_masker_out, "r") as f, open(repeat_masker_replace, "w") as out:
@@ -511,9 +542,11 @@ class Terrier(FamDBObject, ta.TorchApp):
         # results_df['prediction'] = results_df[self.categories].idxmax(axis=1)
         # results_df["prediction_exclude_unknown"] = results_df[[c for c in self.categories if c != "Unknown"]].idxmax(axis=1)
 
-        if output_file:
-            console.print(f"Writing results for {len(repeat_details)} repeats to: {output_file}")
-            repeat_details.to_csv(output_file, index=False)
+        if output_csv:
+            console.print(f"Writing results for {len(results_df)} repeats to: {output_csv}")
+            results_df.to_csv(output_csv, index=False)
+
+        if 
         else:
             print("No output file given.")
 
