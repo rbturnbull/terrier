@@ -461,6 +461,7 @@ class Terrier(FamDBObject, ta.TorchApp):
             min_length=1,
             max_length=max_length,
             max_seqs=max_seqs,
+            format="fasta",
         )
         # self.masked_dataloader = MaskedDataloader(files=fasta, format="fasta", device=learner.dls.device, batch_size=batch_size, min_length=128, max_seqs=max_seqs, max_repeats=max_repeats)
         # only works for repbase
@@ -474,6 +475,9 @@ class Terrier(FamDBObject, ta.TorchApp):
         repeat_masker_replace:Path = ta.Param(default=None, help="A path to write a replacement repeat masker out file."),
         output_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
         output_fasta: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
+        image_dir: Path = ta.Param(default=None, help="A directory to output the results as images."),
+        image_format:str = "svg",
+        image_threshold:float = 0.005,
         **kwargs,
     ):
         if self.vector:
@@ -481,9 +485,12 @@ class Terrier(FamDBObject, ta.TorchApp):
         else:
             classification_results = results[0]
         
-        classification_probabilities = inference.leaf_probabilities(results[0], root=self.classification_tree)
-        chunk_details = pd.DataFrame(self.dataloader.chunk_details, columns=["file", "accession", "chunk"])
-        category_names = [str(node) for node in self.classification_tree.leaves]
+        classification_probabilities = inference.node_probabilities(results[0], root=self.classification_tree)
+        # greedy_predictions = inference.greedy_predictions(results[0], root=self.classification_tree)
+
+        chunk_details = pd.DataFrame(self.dataloader.chunk_details, columns=["file", "original_id", "chunk"])
+        category_names = [str(node) for node in self.classification_tree.node_list if not node.is_root]
+        leaf_names = [str(node) for node in self.classification_tree.leaves]
         predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=category_names)
         results_df = pd.concat(
             [chunk_details.drop(columns=['chunk']), predictions_df],
@@ -491,13 +498,84 @@ class Terrier(FamDBObject, ta.TorchApp):
         )
 
         # Average over chunks
-        results_df = results_df.groupby(["file", "accession"]).mean().reset_index()
-        results_df['prediction'] = results_df[category_names].idxmax(axis=1)
+        results_df["order"] = results_df.index
+        results_df = results_df.groupby(["file", "original_id"]).mean().reset_index()
+
+        # sort to get original order
+        results_df = results_df.sort_values(by="order").drop(columns=["order"])
+        
+        # results_df['max_leaf_probability_prediction'] = results_df[leaf_names].idxmax(axis=1)
+
+        # Get new tensors now that we've averaged over chunks
+        classification_probabilities = torch.as_tensor(results_df[category_names].to_numpy()) 
+        # get greedy predictions which can use the raw activation or the softmax probabilities
+        greedy_predictions = inference.greedy_predictions(classification_probabilities, root=self.classification_tree)
+
+        results_df['greedy_prediction'] = [str(node) for node in greedy_predictions]
+
+        results_df['accession'] = results_df['original_id'].apply(lambda x: x.split("#")[0])
+        def get_original_classification(original_id:str):
+            if "#" in original_id:
+                return original_id.split("#")[1]
+            return "null"
+        
+        def get_prediction_probability(row):
+            prediction = row["greedy_prediction"]
+            return row[prediction]
+        
+        results_df['probability'] = results_df.apply(get_prediction_probability, axis=1)
+        results_df['original_classification'] = results_df['original_id'].apply(get_original_classification)
+
+        # Reorder columns
+        results_df = results_df[["file", "accession", "greedy_prediction", "probability", "original_id", "original_classification" ] + category_names]
+
+        # Output images
+        if image_dir:
+            console.print(f"Writing inference probability renders to: {image_dir}")
+            image_dir = Path(image_dir)
+            image_paths = []
+            for _, row in results_df.iterrows():
+                filepath = row['file']
+                accession = row['accession']
+                image_path = image_dir / Path(filepath).name / f"{accession}.{image_format}"
+                image_paths.append(image_path)
+            inference.render_probabilities(
+                root=self.classification_tree, 
+                filepaths=image_paths,
+                probabilities=classification_probabilities,
+                predictions=greedy_predictions,
+                threshold=image_threshold,
+            )
 
         if output_fasta:
+            console.print(f"Writing results for {len(results_df)} repeats to: {output_fasta}")
             with open(output_fasta, "w") as fasta_out:
                 for file in self.dataloader.files:
                     for record in SeqIO.parse(file, "fasta"):
+                        original_id = record.id
+                        row = results_df.loc[results_df.original_id == original_id]
+                        if len(row) == 0:
+                            SeqIO.write(record, fasta_out, "fasta")
+                            continue
+
+                        accession = row['accession'].item()
+                        original_classification = row["original_classification"].item()
+                        prediction = row["greedy_prediction"].item()
+                        
+                        new_id = f"{accession}#{prediction}"
+                        record.id = new_id
+                        
+                        # Adapt description
+                        record.description = record.description.replace(original_id, "")
+                        last_bracket = record.description.rfind(")")
+                        if last_bracket == -1:
+                            record.description = f"{record.description} ( "
+                        else:
+                            record.description = record.description[:last_bracket].rstrip() + ", "
+
+                        new_probability = row[prediction].values[0]
+                        record.description = f"{record.description} original classification = {original_classification}, classification probability = {new_probability:.2f} )"
+
                         SeqIO.write(record, fasta_out, "fasta")
 
 
@@ -546,7 +624,6 @@ class Terrier(FamDBObject, ta.TorchApp):
             console.print(f"Writing results for {len(results_df)} repeats to: {output_csv}")
             results_df.to_csv(output_csv, index=False)
 
-        if 
         else:
             print("No output file given.")
 
@@ -557,8 +634,7 @@ class Terrier(FamDBObject, ta.TorchApp):
         #     # embeddings.to_netcdf("embeddings.nc")
         #     torch.save(results[0][1], "embeddings.pkl")
 
-
-        return prediction_nodes
+        return results_df
 
     def __call__(
         self, 
