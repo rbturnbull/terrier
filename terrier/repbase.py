@@ -16,6 +16,7 @@ class RepBase():
             self.refs[ref.stem] = pyfastx.Fasta(str(ref), uppercase=True)
 
     def __getitem__(self, value):
+        value = value.strip()
         slash_position = value.find("/")
         if slash_position <= 0:
             raise ValueError(f"key {value} not understood")
@@ -25,8 +26,7 @@ class RepBase():
         assert ref_name in self.refs
         ref = self.refs[ref_name]
         if accession not in ref:
-            breakpoint()
-            ValueError(f"accession {accession} not in ref {ref_name}")
+            raise ValueError(f"accession {accession} not in ref {ref_name}")
         
         return ref[accession]
     

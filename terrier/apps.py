@@ -471,10 +471,10 @@ class Terrier(FamDBObject, ta.TorchApp):
     def output_results(
         self,
         results,
-        repeat_masker_out:Path = ta.Param(default=None, help="The .out file from repeat masker."),
-        repeat_masker_replace:Path = ta.Param(default=None, help="A path to write a replacement repeat masker out file."),
+        # repeat_masker_out:Path = ta.Param(default=None, help="The .out file from repeat masker."),
+        # repeat_masker_replace:Path = ta.Param(default=None, help="A path to write a replacement repeat masker out file."),
         output_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
-        output_fasta: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
+        output_fasta: Path = ta.Param(default=None, help="A path to output the results in FASTA format."),
         image_dir: Path = ta.Param(default=None, help="A directory to output the results as images."),
         image_format:str = "svg",
         image_threshold:float = 0.005,
