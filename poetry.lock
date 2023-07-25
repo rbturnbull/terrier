@@ -1580,7 +1580,7 @@ numpy = ">=1.14.5"
 
 [[package]]
 name = "hierarchicalsoftmax"
-version = "0.2.2"
+version = "1.0.1"
 description = "A Hierarchical Softmax Framework for PyTorch."
 optional = false
 python-versions = "^3.8"
@@ -1597,7 +1597,7 @@ torch = ">=1.10.2"
 type = "git"
 url = "https://github.com/rbturnbull/hierarchicalsoftmax.git"
 reference = "main"
-resolved_reference = "394afd0d7ddfa13158ccb07f578fb4a61720dbe3"
+resolved_reference = "a83464e4d66c94f34049847db3bbaedaed5bd2f6"
 
 [[package]]
 name = "httpcore"

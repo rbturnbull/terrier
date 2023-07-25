@@ -478,6 +478,7 @@ class Terrier(FamDBObject, ta.TorchApp):
         image_dir: Path = ta.Param(default=None, help="A directory to output the results as images."),
         image_format:str = "svg",
         image_threshold:float = 0.005,
+        prediction_threshold:float = ta.Param(default=0.5, help="The threshold value for making hierarchical predictions."),
         **kwargs,
     ):
         if self.vector:
@@ -509,7 +510,11 @@ class Terrier(FamDBObject, ta.TorchApp):
         # Get new tensors now that we've averaged over chunks
         classification_probabilities = torch.as_tensor(results_df[category_names].to_numpy()) 
         # get greedy predictions which can use the raw activation or the softmax probabilities
-        greedy_predictions = inference.greedy_predictions(classification_probabilities, root=self.classification_tree)
+        greedy_predictions = inference.greedy_predictions(
+            classification_probabilities, 
+            root=self.classification_tree, 
+            threshold=prediction_threshold,
+        )
 
         results_df['greedy_prediction'] = [str(node) for node in greedy_predictions]
 
@@ -521,7 +526,9 @@ class Terrier(FamDBObject, ta.TorchApp):
         
         def get_prediction_probability(row):
             prediction = row["greedy_prediction"]
-            return row[prediction]
+            if prediction in row:
+                return row[prediction]
+            return 1.0
         
         results_df['probability'] = results_df.apply(get_prediction_probability, axis=1)
         results_df['original_classification'] = results_df['original_id'].apply(get_original_classification)
