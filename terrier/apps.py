@@ -580,7 +580,10 @@ class Terrier(FamDBObject, ta.TorchApp):
                         else:
                             record.description = record.description[:last_bracket].rstrip() + ", "
 
-                        new_probability = row[prediction].values[0]
+                        if prediction in row:
+                            new_probability = row[prediction].values[0]
+                        else:
+                            new_probability = 1.0 # i.e.root
                         record.description = f"{record.description} original classification = {original_classification}, classification probability = {new_probability:.2f} )"
 
                         SeqIO.write(record, fasta_out, "fasta")
