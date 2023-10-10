@@ -32,6 +32,7 @@ Transposable Element
 		IS3EU
 		Dada
 		IS481EU
+		Replitron
 	LTR Retrotransposon
 		Gypsy
 		Copia
