@@ -9,19 +9,26 @@ from corgi.tensor import dna_seq_to_tensor
 
 
 class PadBatch(Transform):
-    def __init__(self,min_length:int=0, **kwargs):
+    def __init__(self,min_length:int=0, max_length:int=None, **kwargs):
         super().__init__(**kwargs)
         self.min_length = min_length
+        self.max_length = max_length
 
     def encodes(self, batch):
-        max_len = self.min_length
+        length = self.min_length
         for item in batch:
-            max_len = max(item.shape[0], max_len)
+            length = max(item[0].shape[0], length)
+
+        if self.max_length:
+            length = min(self.max_length, length)
 
         def pad(tensor):
-            return slice_tensor(tensor, max_len).unsqueeze(dim=0)
+            # return slice_tensor(tensor[0], length).unsqueeze(dim=0)
+            return (slice_tensor(tensor[0], length),) + tensor[1:]
 
-        return torch.cat(list(map(pad, batch))),
+        return list(map(pad, batch))
+
+        # return torch.cat(list(map(pad, batch)))
 
 
 class MaskedDataloader(SeqIODataloader):

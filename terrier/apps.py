@@ -14,129 +14,75 @@ from fastai.data.transforms import RandomSplitter
 console = Console()
 from hierarchicalsoftmax import HierarchicalSoftmaxLoss, SoftmaxNode
 from hierarchicalsoftmax import metrics, inference, greedy_predictions
-import csv
 import torch
-from corgi.tensor import dna_seq_to_tensor
 from corgi.models import ConvClassifier
+from corgi import Corgi
 from corgi.dataloaders import SeqIODataloader
+from fastcore.transform import Pipeline
 from fastcore.foundation import mask2idxs
 from fastai.data.transforms import IndexSplitter
 from Bio import SeqIO
 from rich.progress import track
 from fastai.metrics import accuracy
-import xarray as xr
 from torchapp.apps import call_func
+
+from corgi.dataloaders import DataloaderType
 from .models import VectorOutput
 
 from .loss import FocalLoss
 from .famdb import FamDB
-from .dataloaders import MaskedDataloader
+from .dataloaders import MaskedDataloader, PadBatch
+from polytorch.metrics import HierarchicalGreedyAccuracy
 
-def greedy_attribute_accuracy(prediction_tensor, target_tensor, root, attribute):
-    prediction_nodes = inference.greedy_predictions(prediction_tensor=prediction_tensor, root=root)
-    prediction_attributes = torch.as_tensor( [getattr(node, attribute) for node in prediction_nodes], dtype=int).to(target_tensor.device)
+# def greedy_attribute_accuracy(prediction_tensor, target_tensor, root, attribute):
+#     prediction_nodes = inference.greedy_predictions(prediction_tensor=prediction_tensor, root=root)
+#     prediction_attributes = torch.as_tensor( [getattr(node, attribute) for node in prediction_nodes], dtype=int).to(target_tensor.device)
 
-    target_nodes = [root.node_list[target] for target in target_tensor]
-    target_attributes = torch.as_tensor( [getattr(node, attribute) for node in target_nodes], dtype=int).to(target_tensor.device)
+#     target_nodes = [root.node_list[target] for target in target_tensor]
+#     target_attributes = torch.as_tensor( [getattr(node, attribute) for node in target_nodes], dtype=int).to(target_tensor.device)
 
-    return (prediction_attributes == target_attributes).float().mean()
-
-
-class DictionaryGetter:
-    def __init__(self, dictionary):
-        self.dictionary = dictionary
-
-    def __call__(self, key):
-        value = self.dictionary[key]
-        return value
-
-
-class SetSplitter:
-    def __init__(self, data):
-        self.data = set(data)
-
-    def __call__(self, objects):
-        validation_indexes = mask2idxs(object in self.data for object in objects)
-        return IndexSplitter(validation_indexes)(objects)
-
-
-
+#     return (prediction_attributes == target_attributes).float().mean()
 
 
 class Terrier(Corgi):
     """
-    Classifier of Repeats
+    Transposable Element Repeat Result classifIER
     """
-    def render_classification_tree(self):
-        try:
-            text_file = Path("classification_tree.txt")
-            text_file.write_text(str(self.classification_tree.render()))
-            self.classification_tree.render(filepath="classification_tree.svg")
-            self.classification_tree.render(filepath="classification_tree.png")
-        except Exception as err:
-            print(f"Cannot render classification tree {err}")
+    def dataloaders(
+        self,
+        seqtree: Path = ta.Param(help="The seqtree which has the sequences to use."),
+        seqbank:Path = ta.Param(help="The HDF5 file with the sequences."),
+        validation_partition:int = ta.Param(default=1, help="The partition to use for validation."),
+        batch_size: int = ta.Param(default=32, help="The batch size."),
+        dataloader_type: DataloaderType = ta.Param(
+            default=DataloaderType.PLAIN, case_sensitive=False
+        ),
+        min_length:int = 64,
+        max_length:int = 4096,
+        deform_lambda:float = ta.Param(default=None, help="The lambda for the deform transform."),
+        tips_mode:bool = True,
+    ) -> DataLoaders:
+        """
+        Creates a FastAI DataLoaders object which Terrier uses in training and prediction.
 
-    def setup_repbase_classification_tree(self, label_smoothing=0.0, gamma=None):
-        self.classification_tree = SoftmaxNode(name="root", label_smoothing=label_smoothing, gamma=gamma)
-        self.classification_nodes = {}
+        Returns:
+            DataLoaders: The DataLoaders object.
+        """
+        dls = super().dataloaders(
+            seqtree=seqtree,
+            seqbank=seqbank,
+            validation_partition=validation_partition,
+            batch_size=batch_size,
+            dataloader_type=dataloader_type,
+            deform_lambda=deform_lambda,
+            tips_mode=tips_mode,
+        )
         
-        prev = self.classification_tree
-        parent = self.classification_tree
-        indentation = 0
-        with open(Path(__file__).parent/"data/repbase.tree.txt") as f:
-            for line in f:
-                my_indent = line.count("\t")
-                if my_indent > indentation:
-                    assert my_indent == indentation + 1
-                    parent = prev
-                    indentation = my_indent
-                elif my_indent < indentation:
-                    while my_indent < indentation:
-                        parent = parent.parent
-                        indentation -= 1
-                name = line.strip()
-                prev = SoftmaxNode(name, parent=parent, count=0, label_smoothing=label_smoothing, gamma=gamma)
-                self.classification_nodes[name] = prev
-        self.classification_tree.set_indexes()
-
-    def setup_dfam_classification_tree(self):
-        self.classification_tree = SoftmaxNode(name="root")
-        self.classification_nodes = {}
-        self.repeatmasker_types = []
-        with open(Path(__file__).parent/"data/TEClasses.tsv") as f:
-            reader = csv.DictReader(f, delimiter='\t')
-            for row in reader:
-                lineage_string = row['full_name']
-                lineage = lineage_string.split(";")
-                if len(lineage) == 1:
-                    parent = self.classification_tree
-                else:
-                    parent_lineage_string = ";".join(lineage[:-1])
-                    parent = self.classification_nodes[parent_lineage_string]
-                
-                repeat_masker_type = row['repeatmasker_type']
-                repeat_masker_type_id = None
-                if repeat_masker_type:
-                    if not repeat_masker_type in self.repeatmasker_types:
-                        self.repeatmasker_types.append(repeat_masker_type)
-                    repeat_masker_type_id = self.repeatmasker_types.index(repeat_masker_type)
-
-                node = SoftmaxNode(
-                    name=lineage[-1], 
-                    parent=parent, 
-                    title=row['title'], 
-                    repeat_masker_type=repeat_masker_type,
-                    repeat_masker_type_id=repeat_masker_type_id,
-                )
-                self.classification_nodes[lineage_string] = node
-        self.repeatmasker_type_dict = {key: value for key, value in enumerate(self.repeatmasker_types)}
-
-        self.classification_tree.set_indexes()
-
-
-
-    def monitor(self):
-        return "greedy_f1_score"
+        before_batch = Pipeline(PadBatch(min_length=min_length, max_length=max_length))
+        dls.train.before_batch = before_batch
+        dls.valid.before_batch = before_batch
+        
+        return dls
 
     def inference_dataloader(
         self,
@@ -160,6 +106,15 @@ class Terrier(Corgi):
         # only works for repbase
         self.setup_repbase_classification_tree()
         return self.dataloader
+
+    def metrics(self):
+        return [
+            HierarchicalGreedyAccuracy(root=self.classification_tree, max_depth=1, data_index=0, name="accuracy_repeatmasker_type"),
+            HierarchicalGreedyAccuracy(root=self.classification_tree, max_depth=2, data_index=0, name="accuracy_repeatmasker_subtype"),
+        ]        
+    
+    def monitor(self):
+        return "accuracy_repeatmasker_subtype"
 
     def output_results(
         self,
@@ -338,30 +293,3 @@ class Terrier(Corgi):
         #     torch.save(results[0][1], "embeddings.pkl")
 
         return results_df
-
-    def __call__(
-        self, 
-        gpu: bool = ta.Param(True, help="Whether or not to use a GPU for processing if available."), 
-        vector: bool = ta.Param(False, help="Whether or not to save the penultimate layer activations as a vector."), 
-        **kwargs
-    ):
-        # Check if CUDA is available
-        gpu = gpu and torch.cuda.is_available()
-
-        # Open the exported learner from a pickle file
-        path = call_func(self.pretrained_local_path, **kwargs)
-        learner = self.learner_obj = load_learner(path, cpu=not gpu)
-
-        # Create a dataloader for inference
-        dataloader = call_func(self.inference_dataloader, learner, **kwargs)
-
-        self.vector = vector
-        if vector:
-            # adapt the model
-            learner.model.final = VectorOutput(learner.model.final)
-
-        results = learner.get_preds(dl=dataloader, reorder=False, with_decoded=False, act=self.activation(), cbs=self.inference_callbacks())
-
-        # Output results
-        output_results = call_func(self.output_results, results, **kwargs)
-        return output_results if output_results is not None else results
