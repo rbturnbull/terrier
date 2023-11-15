@@ -26,7 +26,7 @@ from rich.progress import track
 from fastai.metrics import accuracy
 from torchapp.apps import call_func
 
-from corgi.dataloaders import DataloaderType
+# from corgi.dataloaders import DataloaderType
 from .models import VectorOutput
 
 from .loss import FocalLoss
@@ -54,9 +54,9 @@ class Terrier(Corgi):
         seqbank:Path = ta.Param(help="The HDF5 file with the sequences."),
         validation_partition:int = ta.Param(default=1, help="The partition to use for validation."),
         batch_size: int = ta.Param(default=32, help="The batch size."),
-        dataloader_type: DataloaderType = ta.Param(
-            default=DataloaderType.PLAIN, case_sensitive=False
-        ),
+        # dataloader_type: DataloaderType = ta.Param(
+        #     default=DataloaderType.PLAIN, case_sensitive=False
+        # ),
         min_length:int = 64,
         max_length:int = 4096,
         deform_lambda:float = ta.Param(default=None, help="The lambda for the deform transform."),
@@ -73,7 +73,7 @@ class Terrier(Corgi):
             seqbank=seqbank,
             validation_partition=validation_partition,
             batch_size=batch_size,
-            dataloader_type=dataloader_type,
+            # dataloader_type=dataloader_type,
             deform_lambda=deform_lambda,
             tips_mode=tips_mode,
         )
@@ -87,24 +87,25 @@ class Terrier(Corgi):
     def inference_dataloader(
         self,
         learner,
-        fasta: List[Path] = ta.Param(None, help="A fasta file with sequences to be classified."),
+        file: List[Path] = ta.Param(None, help="A file with sequences to be classified."),
         max_seqs: int = None,
         max_length:int=25_000,
         batch_size:int = 1,
+        format:str = "",
         **kwargs,
     ):        
         self.dataloader = SeqIODataloader(
-            files=fasta, 
+            files=file, 
             device=learner.dls.device, 
             batch_size=batch_size, 
             min_length=1,
             max_length=max_length,
             max_seqs=max_seqs,
-            format="fasta",
+            format=format,
         )
+        breakpoint()
         # self.masked_dataloader = MaskedDataloader(files=fasta, format="fasta", device=learner.dls.device, batch_size=batch_size, min_length=128, max_seqs=max_seqs, max_repeats=max_repeats)
         # only works for repbase
-        self.setup_repbase_classification_tree()
         return self.dataloader
 
     def metrics(self):
