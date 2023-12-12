@@ -2,6 +2,7 @@ import typer
 from pathlib import Path
 from hierarchicalsoftmax import SoftmaxNode
 from Bio import SeqIO
+from collections import Counter
 
 from corgi.seqtree import SeqTree, AlreadyExists
 
@@ -35,6 +36,8 @@ def create_repbase_seqtree(output:Path, repbase:Path, label_smoothing:float=0.0,
 
     seqtree = SeqTree(classification_tree)
 
+    counter = Counter()
+
     # Read files
     count = 0
     for file in repbase.glob('*.ref'):
@@ -55,6 +58,7 @@ def create_repbase_seqtree(output:Path, repbase:Path, label_smoothing:float=0.0,
                     classification = components[1]
 
                 print(classification)
+                counter.update([classification])
                 if classification not in classification_nodes:
                     continue
                     breakpoint()
@@ -68,6 +72,9 @@ def create_repbase_seqtree(output:Path, repbase:Path, label_smoothing:float=0.0,
                     print(err)
 
                 count += 1
+
+    for key, value in counter.most_common(): 
+        print(key, value, sep=",")
 
     seqtree.save(output)
 
