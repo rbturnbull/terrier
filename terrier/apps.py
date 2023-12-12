@@ -26,6 +26,7 @@ from rich.progress import track
 from fastai.metrics import accuracy
 from torchapp.apps import call_func
 
+from corgi.seqtree import SeqTree
 # from corgi.dataloaders import DataloaderType
 from .models import VectorOutput
 
@@ -98,12 +99,12 @@ class Terrier(Corgi):
             files=file, 
             device=learner.dls.device, 
             batch_size=batch_size, 
-            min_length=1,
+            min_length=64,
             max_length=max_length,
             max_seqs=max_seqs,
             format=format,
         )
-        breakpoint()
+
         # self.masked_dataloader = MaskedDataloader(files=fasta, format="fasta", device=learner.dls.device, batch_size=batch_size, min_length=128, max_seqs=max_seqs, max_repeats=max_repeats)
         # only works for repbase
         return self.dataloader
@@ -120,9 +121,11 @@ class Terrier(Corgi):
     def output_results(
         self,
         results,
+        seqtree:Path=None,
         # repeat_masker_out:Path = ta.Param(default=None, help="The .out file from repeat masker."),
         # repeat_masker_replace:Path = ta.Param(default=None, help="A path to write a replacement repeat masker out file."),
         output_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
+        output_tips_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV which only stores the probabilities at the tips."),
         output_fasta: Path = ta.Param(default=None, help="A path to output the results in FASTA format."),
         image_dir: Path = ta.Param(default=None, help="A directory to output the results as images."),
         image_format:str = "svg",
@@ -130,18 +133,20 @@ class Terrier(Corgi):
         prediction_threshold:float = ta.Param(default=0.5, help="The threshold value for making hierarchical predictions."),
         **kwargs,
     ):
-        if self.vector:
-            classification_results = results[0][0]
-        else:
-            classification_results = results[0]
+        seqtree = SeqTree.load(seqtree)
+        self.classification_tree = seqtree.classification_tree
         
+        def node_lineage_string(node) -> str:
+            return "/".join([str(n) for n in node.ancestors[1:]] + [str(node)])
+
         classification_probabilities = inference.node_probabilities(results[0], root=self.classification_tree)
+        category_names = [node_lineage_string(node) for node in self.classification_tree.node_list if not node.is_root]
+
         # greedy_predictions = inference.greedy_predictions(results[0], root=self.classification_tree)
 
         chunk_details = pd.DataFrame(self.dataloader.chunk_details, columns=["file", "original_id", "chunk"])
-        category_names = [str(node) for node in self.classification_tree.node_list if not node.is_root]
-        leaf_names = [str(node) for node in self.classification_tree.leaves]
         predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=category_names)
+
         results_df = pd.concat(
             [chunk_details.drop(columns=['chunk']), predictions_df],
             axis=1,
@@ -165,7 +170,10 @@ class Terrier(Corgi):
             threshold=prediction_threshold,
         )
 
-        results_df['greedy_prediction'] = [str(node) for node in greedy_predictions]
+        results_df['greedy_prediction'] = [
+            node_lineage_string(node)
+            for node in greedy_predictions
+        ]
 
         results_df['accession'] = results_df['original_id'].apply(lambda x: x.split("#")[0])
         def get_original_classification(original_id:str):
@@ -203,6 +211,9 @@ class Terrier(Corgi):
                 threshold=image_threshold,
             )
 
+        if not (image_dir or output_fasta or output_csv or output_tips_csv):
+            print("No output files requested.")
+
         if output_fasta:
             console.print(f"Writing results for {len(results_df)} repeats to: {output_fasta}")
             with open(output_fasta, "w") as fasta_out:
@@ -237,54 +248,18 @@ class Terrier(Corgi):
 
                         SeqIO.write(record, fasta_out, "fasta")
 
-
-        # repeat_details = pd.DataFrame(self.dataloader.repeat_details, columns=["file", "accession", "start", "end"])
-        # prediction_nodes = inference.greedy_predictions(classification_results, root=self.classification_tree)
-        # repeat_details["category"] = prediction_nodes
-        # repeat_details["hierarchical_classification"] = [" > ".join([str(anc) for anc in node.ancestors[1:] + (str(node),) ]) for node in prediction_nodes]
-
-        # current_node = 0
-        # with open(repeat_masker_out, "r") as f, open(repeat_masker_replace, "w") as out:
-        #     for line_number, line in enumerate(f):
-        #         if line_number >= 3: # after header
-        #             m = re.match(r"^\s*(\S+\s+){11}", line)
-        #             if m is None:
-        #                 breakpoint()
-        #             start, stop = m.span(1)
-        #             prediction = str(prediction_nodes[current_node])
-
-        #             # error checking 
-        #             m = re.match(r"^\s*(\S+\s+){5}(\d+)\s+(\d+)", line)
-        #             assert m is not None
-        #             seq_start = int(m.group(2))
-        #             seq_end = int(m.group(3))
-        #             if seq_start != self.masked_dataloader.repeat_details[current_node][2]:
-        #                 breakpoint()
-        #             # if seq_end != self.masked_dataloader.repeat_details[current_node][3]:
-        #             #     breakpoint()
-
-        #             line = line[:start] + prediction + " "*(stop-start-len(prediction)) + line[stop:]
-        #             current_node += 1
-
-        #         out.write(line)
-        #         if current_node >= len(prediction_nodes):
-        #             break
-
-        # classification_probabilities = torch.softmax(classification_results, axis=1)
-        # predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=self.categories)
-        # results_df = pd.concat(
-        #     [repeat_details, predictions_df],
-        #     axis=1,
-        # )
-        # results_df['prediction'] = results_df[self.categories].idxmax(axis=1)
-        # results_df["prediction_exclude_unknown"] = results_df[[c for c in self.categories if c != "Unknown"]].idxmax(axis=1)
+        if output_tips_csv:
+            output_tips_csv = Path(output_tips_csv)
+            output_tips_csv.parent.mkdir(exist_ok=True, parents=True)
+            non_tips = [node_lineage_string(node) for node in self.classification_tree.node_list if not node.is_leaf]
+            tips_df = results_df.drop(columns=non_tips)
+            tips_df.to_csv(output_tips_csv, index=False)
 
         if output_csv:
+            output_csv = Path(output_csv)
+            output_csv.parent.mkdir(exist_ok=True, parents=True)
             console.print(f"Writing results for {len(results_df)} repeats to: {output_csv}")
             results_df.to_csv(output_csv, index=False)
-
-        else:
-            print("No output file given.")
 
         # if self.vector:
         #     # x = results_df.to_xarray()
