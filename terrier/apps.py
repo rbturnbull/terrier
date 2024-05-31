@@ -25,6 +25,7 @@ from Bio import SeqIO
 from rich.progress import track
 from fastai.metrics import accuracy
 from torchapp.apps import call_func
+# from fastai.callback.fp16 import AMPMode
 
 from corgi.seqtree import SeqTree
 # from corgi.dataloaders import DataloaderType
@@ -45,6 +46,7 @@ from polytorch.metrics import HierarchicalGreedyAccuracy
 #     return (prediction_attributes == target_attributes).float().mean()
 
 
+
 class Terrier(Corgi):
     """
     Transposable Element Repeat Result classifIER
@@ -55,6 +57,7 @@ class Terrier(Corgi):
         seqbank:Path = ta.Param(help="The HDF5 file with the sequences."),
         validation_partition:int = ta.Param(default=1, help="The partition to use for validation."),
         batch_size: int = ta.Param(default=32, help="The batch size."),
+        phi:float=ta.Param(default=1.0, tune=True, tune_max=1.2, tune_min=0.8, help="A multiplication factor for the loss at each level of the tree."),
         # dataloader_type: DataloaderType = ta.Param(
         #     default=DataloaderType.PLAIN, case_sensitive=False
         # ),
@@ -69,14 +72,16 @@ class Terrier(Corgi):
         Returns:
             DataLoaders: The DataLoaders object.
         """
+        self.validation_partition = validation_partition
         dls = super().dataloaders(
             seqtree=seqtree,
             seqbank=seqbank,
             validation_partition=validation_partition,
             batch_size=batch_size,
             # dataloader_type=dataloader_type,
-            deform_lambda=deform_lambda,
+            # deform_lambda=deform_lambda,
             tips_mode=tips_mode,
+            phi=phi,
         )
         
         before_batch = Pipeline(PadBatch(min_length=min_length, max_length=max_length))
@@ -95,6 +100,8 @@ class Terrier(Corgi):
         format:str = "",
         **kwargs,
     ):        
+        # learner.amp_mode = AMPMode.FP16 # hack for different versions of fastai
+
         self.dataloader = SeqIODataloader(
             files=file, 
             device=learner.dls.device, 
@@ -128,11 +135,14 @@ class Terrier(Corgi):
         output_tips_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV which only stores the probabilities at the tips."),
         output_fasta: Path = ta.Param(default=None, help="A path to output the results in FASTA format."),
         image_dir: Path = ta.Param(default=None, help="A directory to output the results as images."),
-        image_format:str = "svg",
+        image_format:str = "png",
         image_threshold:float = 0.005,
         prediction_threshold:float = ta.Param(default=0.5, help="The threshold value for making hierarchical predictions."),
         **kwargs,
     ):
+        if seqtree is None:
+            seqtree = Path(__file__).parent/"data/repbase28.10.st"
+
         seqtree = SeqTree.load(seqtree)
         self.classification_tree = seqtree.classification_tree
         
@@ -216,6 +226,8 @@ class Terrier(Corgi):
 
         if output_fasta:
             console.print(f"Writing results for {len(results_df)} repeats to: {output_fasta}")
+            output_fasta = Path(output_fasta)
+            output_fasta.parent.mkdir(exist_ok=True, parents=True)
             with open(output_fasta, "w") as fasta_out:
                 for file in self.dataloader.files:
                     for record in SeqIO.parse(file, "fasta"):
@@ -269,3 +281,9 @@ class Terrier(Corgi):
         #     torch.save(results[0][1], "embeddings.pkl")
 
         return results_df
+
+    def pretrained_location(self) -> str:
+        return "https://github.com/rbturnbull/terrier/releases/download/v0.1.1-alpha/terrier-0.1.pkl"
+    
+    # def monitor(self):
+    #     return ""
