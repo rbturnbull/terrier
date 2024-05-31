@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Terrier"
-version = "0.1.0"
+version = "0.1.1"
 description = "Classifier of Repeats"
 authors = ["Robert Turnbull <robert.turnbull@unimelb.edu.au>"]
 license = "Apache-2.0"
@@ -18,12 +18,12 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
+python = ">=3.10,<3.12"
 torchapp = ">=0.3.7"
 hierarchicalsoftmax = {git = "https://github.com/rbturnbull/hierarchicalsoftmax.git", branch="main"}
 h5py = "^3.8.0"
 anytree = "^2.8.0"
-bio-corgi = {git = "https://github.com/rbturnbull/corgi.git", branch="hierarchical"}
+bio-corgi = {git = "https://github.com/rbturnbull/corgi.git", branch="hierarchical", rev="82ec9c2"}
 pyarrow = "^12.0.0"
 pyfastx = "^1.1.0"
 torch = "2.0.0"
@@ -53,4 +53,5 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-terrier = "terrier.apps:Terrier.main"
+terrier-tools = "terrier.apps:Terrier.main"
+terrier = "terrier.apps:Terrier.inference_only_main"
