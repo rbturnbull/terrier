@@ -168,3 +168,14 @@ cython_debug/
 #.idea/
 classification_tree.*
 *.slurm
+
+output
+outputs
+*.fasta
+*.pkl
+curated-*
+dfam-unknown.py
+embeddings.nc
+model.pth
+scaphiopus_holbrookii_noMasking.fasta.0.te.csv
+repbase.refs.csv
