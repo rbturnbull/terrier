@@ -6,7 +6,7 @@
 Welcome to Terrier's documentation!
 ===========================================================
 
-.. image:: https://raw.githubusercontent.com/rbturnbull/terrier/main/docs/images/terrier-banner.svg
+.. image:: https://raw.githubusercontent.com/rbturnbull/terrier/main/docs/images/terrier-banner.png
 
 .. include:: ../README.rst
    :start-after: start-badges
