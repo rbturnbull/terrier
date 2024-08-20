@@ -50,5 +50,6 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-terrier-tools = "terrier.apps:Terrier.main"
-terrier = "terrier.apps:Terrier.inference_only_main"
+terrier = "terrier.apps:Terrier.main"
+terrier-tools = "terrier.apps:Terrier.tools"
+
