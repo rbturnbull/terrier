@@ -20,7 +20,7 @@ from corgi import Corgi
 from corgi.seqtree import SeqTree
 from polytorch.metrics import HierarchicalGreedyAccuracy
 
-from .repeatmaster import create_repeatmasker_seqtree
+from .repeatmasker import create_repeatmasker_seqtree
 
 
 class Terrier(Corgi):
