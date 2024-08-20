@@ -11,7 +11,7 @@ from collections import Counter
 app = typer.Typer()
 
 @app.command()
-def create_repbase_seqtree_repeatmasker(output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
+def create_repeatmasker_seqtree(output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
     with open(Path(__file__).parent/"data/repbase-to-repeatmasker.toml", "r") as f:
         mapping = toml.load(f)
 

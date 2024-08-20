@@ -20,6 +20,8 @@ from corgi import Corgi
 from corgi.seqtree import SeqTree
 from polytorch.metrics import HierarchicalGreedyAccuracy
 
+from .repeatmaster import create_repeatmasker_seqtree
+
 
 class Terrier(Corgi):
     """
@@ -260,7 +262,7 @@ class Terrier(Corgi):
         return "https://github.com/rbturnbull/terrier/releases/download/v0.1.1-alpha/terrier-0.1.pkl"
     
     @ta.tool
-    def create_repeatmasker_seqtree(output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
+    def create_repeatmasker_seqtree(self, output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
         return create_repeatmasker_seqtree(
             output=output,
             repbase=repbase,
