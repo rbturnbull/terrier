@@ -5,12 +5,8 @@ import random
 from functools import partial
 from pathlib import Path
 from torch import nn
-from fastai.data.core import DataLoaders
 import torchapp as ta
-from fastai.learner import load_learner
 from rich.console import Console
-from fastai.data.block import DataBlock, TransformBlock, CategoryBlock
-from fastai.data.transforms import RandomSplitter
 console = Console()
 from hierarchicalsoftmax import HierarchicalSoftmaxLoss, SoftmaxNode
 from hierarchicalsoftmax import metrics, inference, greedy_predictions
@@ -20,54 +16,35 @@ from corgi import Corgi
 from corgi.dataloaders import SeqIODataloader
 from fastcore.transform import Pipeline
 from fastcore.foundation import mask2idxs
-from fastai.data.transforms import IndexSplitter
 from Bio import SeqIO
 from rich.progress import track
-from fastai.metrics import accuracy
-from torchapp.apps import call_func
-# from fastai.callback.fp16 import AMPMode
-
 from corgi.seqtree import SeqTree
 # from corgi.dataloaders import DataloaderType
+
 from .models import VectorOutput
 
-from .loss import FocalLoss
-from .famdb import FamDB
 from .dataloaders import MaskedDataloader, PadBatch
 from polytorch.metrics import HierarchicalGreedyAccuracy
-
-# def greedy_attribute_accuracy(prediction_tensor, target_tensor, root, attribute):
-#     prediction_nodes = inference.greedy_predictions(prediction_tensor=prediction_tensor, root=root)
-#     prediction_attributes = torch.as_tensor( [getattr(node, attribute) for node in prediction_nodes], dtype=int).to(target_tensor.device)
-
-#     target_nodes = [root.node_list[target] for target in target_tensor]
-#     target_attributes = torch.as_tensor( [getattr(node, attribute) for node in target_nodes], dtype=int).to(target_tensor.device)
-
-#     return (prediction_attributes == target_attributes).float().mean()
-
 
 
 class Terrier(Corgi):
     """
     Transposable Element Repeat Result classifIER
     """
-    def dataloaders(
+    def data(
         self,
         seqtree: Path = ta.Param(help="The seqtree which has the sequences to use."),
         seqbank:Path = ta.Param(help="The HDF5 file with the sequences."),
         validation_partition:int = ta.Param(default=1, help="The partition to use for validation."),
         batch_size: int = ta.Param(default=32, help="The batch size."),
         phi:float=ta.Param(default=1.0, tune=True, tune_max=1.2, tune_min=0.8, help="A multiplication factor for the loss at each level of the tree."),
-        # dataloader_type: DataloaderType = ta.Param(
-        #     default=DataloaderType.PLAIN, case_sensitive=False
-        # ),
         min_length:int = 64,
         max_length:int = 4096,
         deform_lambda:float = ta.Param(default=None, help="The lambda for the deform transform."),
         tips_mode:bool = True,
     ) -> DataLoaders:
         """
-        Creates a FastAI DataLoaders object which Terrier uses in training and prediction.
+        Creates a Pytorch Lightning Data Module which Terrier uses in training and validation.
 
         Returns:
             DataLoaders: The DataLoaders object.
