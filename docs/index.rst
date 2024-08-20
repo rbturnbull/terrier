@@ -19,6 +19,7 @@ Classifier of Repeats
    :caption: Contents:
 
    quickstart
+   preprocessing
    api
    cli
    credits
