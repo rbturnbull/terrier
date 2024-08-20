@@ -23,7 +23,7 @@ jobs:
     - run: poetry install
     - name: Docs
       run: |
-        poetry run sphinx-build -b html docs gh-pages
+        poetry run sphinx-build docs gh-pages
     - name: Coverage
       run: |
         poetry run coverage run -m pytest

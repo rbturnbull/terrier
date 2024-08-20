@@ -20,6 +20,7 @@ Classifier of Repeats
 
    quickstart
    preprocessing
+   training
    api
    cli
    credits

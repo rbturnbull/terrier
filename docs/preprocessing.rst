@@ -41,7 +41,7 @@ To create the SeqTree file we use the `create-repeatmasker-seqtree` command from
 
     terrier-tools create-repeatmasker-seqtree $REPBASE_DIR/RepBase29.07.st $REPBASE_DIR
 
-This will create a SeqTree with five cross-validation partitions and the taxonomic tree from the Repbase library using the RepeatMasker schema.
+This will create a SeqTree file at ``$REPBASE_DIR/RepBase29.07.st`` with five cross-validation partitions and the taxonomic tree from the Repbase library using the RepeatMasker schema.
 
 To create a different number of partitions, run the command with the `--partitions` flag. For more options see the help:
 
