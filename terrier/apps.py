@@ -16,6 +16,7 @@ import torch
 # from corgi.dataloaders import SeqIODataloader
 from Bio import SeqIO
 from rich.progress import track
+from seqbank import SeqBank
 from corgi import Corgi
 from corgi.seqtree import SeqTree
 from polytorch.metrics import HierarchicalGreedyAccuracy
@@ -265,6 +266,26 @@ class Terrier(Corgi):
     def create_repeatmasker_seqtree(self, output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
         return create_repeatmasker_seqtree(
             output=output,
+            repbase=repbase,
+            label_smoothing=label_smoothing,
+            gamma=gamma,
+            partitions=partitions,
+        )
+
+    @ta.tool
+    def preprocess(self, repbase:Path, seqbank:Path, seqtree:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
+        seqbank = SeqBank(path=seqbank, write=True)
+        assert repbase is not None
+        repbase = Path(repbase)
+        assert repbase.exists()
+
+        # Create the seqbank from the FASTA files with .ref extension
+        files = list(repbase.glob('*.ref'))
+        seqbank.add_files(files, format="fasta")
+
+        # Create the seqtree
+        return create_repeatmasker_seqtree(
+            output=seqtree,
             repbase=repbase,
             label_smoothing=label_smoothing,
             gamma=gamma,
