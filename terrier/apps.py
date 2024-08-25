@@ -6,8 +6,8 @@ from functools import partial
 from pathlib import Path
 from torch import nn
 import torchapp as ta
-from rich.console import Console
-console = Console()
+from torchmetrics import Metric
+from hierarchicalsoftmax.metrics import RankAccuracyTorchMetric
 from hierarchicalsoftmax import HierarchicalSoftmaxLoss, SoftmaxNode
 from hierarchicalsoftmax import metrics, inference, greedy_predictions
 import torch
@@ -20,6 +20,9 @@ from seqbank import SeqBank
 from corgi import Corgi
 from corgi.seqtree import SeqTree
 from polytorch.metrics import HierarchicalGreedyAccuracy
+
+from rich.console import Console
+console = Console()
 
 from .repeatmasker import create_repeatmasker_seqtree
 
@@ -90,13 +93,16 @@ class Terrier(Corgi):
         # only works for repbase
         return self.dataloader
 
-    @ta.method
-    def metrics(self):
-        return [
-            HierarchicalGreedyAccuracy(root=self.classification_tree, max_depth=1, data_index=0, name="accuracy_repeatmasker_type"),
-            HierarchicalGreedyAccuracy(root=self.classification_tree, max_depth=2, data_index=0, name="accuracy_repeatmasker_subtype"),
-        ]        
+    @ta.method    
+    def metrics(self) -> list[tuple[str,Metric]]:
+        rank_accuracy = RankAccuracyTorchMetric(
+            root=self.classification_tree, 
+            ranks={1:"accuracy_repeatmasker_type", 2:"accuracy_repeatmasker_subtype"},
+        )
+                
+        return [('rank_accuracy', rank_accuracy)]
     
+    @ta.method
     def monitor(self):
         return "accuracy_repeatmasker_subtype"
 
