@@ -179,3 +179,4 @@ embeddings.nc
 model.pth
 scaphiopus_holbrookii_noMasking.fasta.0.te.csv
 repbase.refs.csv
+logs/
