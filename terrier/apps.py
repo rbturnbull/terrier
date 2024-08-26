@@ -31,6 +31,11 @@ class Terrier(Corgi):
     """
     Transposable Element Repeat Result classifIER
     """
+    @ta.method("super")
+    def data(self, **kwargs):
+        data = super().data(**kwargs)
+        return data
+
     # def data(
     #     self,
     #     seqtree: Path = ta.Param(help="The seqtree which has the sequences to use."),
@@ -66,32 +71,6 @@ class Terrier(Corgi):
     #     dls.valid.before_batch = before_batch
         
     #     return dls
-
-    def inference_dataloader(
-        self,
-        learner,
-        file: List[Path] = ta.Param(None, help="A file with sequences to be classified."),
-        max_seqs: int = None,
-        max_length:int=25_000,
-        batch_size:int = 1,
-        format:str = "",
-        **kwargs,
-    ):        
-        # learner.amp_mode = AMPMode.FP16 # hack for different versions of fastai
-
-        self.dataloader = SeqIODataloader(
-            files=file, 
-            device=learner.dls.device, 
-            batch_size=batch_size, 
-            min_length=64,
-            max_length=max_length,
-            max_seqs=max_seqs,
-            format=format,
-        )
-
-        # self.masked_dataloader = MaskedDataloader(files=fasta, format="fasta", device=learner.dls.device, batch_size=batch_size, min_length=128, max_seqs=max_seqs, max_repeats=max_repeats)
-        # only works for repbase
-        return self.dataloader
 
     @ta.method    
     def metrics(self) -> list[tuple[str,Metric]]:
