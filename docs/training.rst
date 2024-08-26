@@ -11,13 +11,15 @@ To use the same hyperparameters as in the main release of Terrier, you can run t
 
 .. code-block:: bash
 
+    SEQBANK=$REPBASE_DIR/Repbase-seqbank.sb
+    SEQTREE=$REPBASE_DIR/Repbase-seqtree.st
     terrier-tools train \
-        --seqtree $REPBASE_DIR/RepBase29.07.st \
-        --seqbank $REPBASE_DIR/RepBase29.07.sb \
-        --learning-rate 0.001 \
+        --seqtree $SEQTREE \
+        --seqbank $SEQBANK \
+        --max-learning-rate 0.001 \
         --macc 10000000000 \
-        --epochs 130 \
-        --output-dir outputs/$RUN_NAME 
+        --max-epochs 130 \
+        --output-dir outputs/ 
 
 You can see the command-line options by running:
 
