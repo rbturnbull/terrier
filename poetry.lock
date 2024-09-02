@@ -4505,7 +4505,7 @@ wandb = ">=0.12.9"
 type = "git"
 url = "https://github.com/rbturnbull/torchapp.git"
 reference = "lightning"
-resolved_reference = "319a0621146b7f1eb8f3978a643077345bd93df7"
+resolved_reference = "0790fd46a3b010b96bba781dd1dba1190c3b4d51"
 
 [[package]]
 name = "torchmetrics"
