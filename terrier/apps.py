@@ -1,7 +1,6 @@
-import re
 import pandas as pd
 from typing import List
-import random
+import lightning as L
 from functools import partial
 from pathlib import Path
 from torch import nn
@@ -89,9 +88,6 @@ class Terrier(Corgi):
     def output_results(
         self,
         results,
-        seqtree:Path=None,
-        # repeat_masker_out:Path = ta.Param(default=None, help="The .out file from repeat masker."),
-        # repeat_masker_replace:Path = ta.Param(default=None, help="A path to write a replacement repeat masker out file."),
         output_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
         output_tips_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV which only stores the probabilities at the tips."),
         output_fasta: Path = ta.Param(default=None, help="A path to output the results in FASTA format."),
@@ -100,13 +96,7 @@ class Terrier(Corgi):
         image_threshold:float = 0.005,
         prediction_threshold:float = ta.Param(default=0.5, help="The threshold value for making hierarchical predictions."),
         **kwargs,
-    ):
-        if seqtree is None:
-            seqtree = Path(__file__).parent/"data/repbase28.10.st"
-
-        seqtree = SeqTree.load(seqtree)
-        self.classification_tree = seqtree.classification_tree
-        
+    ):        
         def node_lineage_string(node) -> str:
             return "/".join([str(n) for n in node.ancestors[1:]] + [str(node)])
 
@@ -174,6 +164,7 @@ class Terrier(Corgi):
                 accession = row['accession']
                 image_path = image_dir / Path(filepath).name / f"{accession}.{image_format}"
                 image_paths.append(image_path)
+                
             inference.render_probabilities(
                 root=self.classification_tree, 
                 filepaths=image_paths,
@@ -191,7 +182,7 @@ class Terrier(Corgi):
             output_fasta.parent.mkdir(exist_ok=True, parents=True)
             with open(output_fasta, "w") as fasta_out:
                 for file in self.dataloader.files:
-                    for record in SeqIO.parse(file, "fasta"):
+                    for record in self.dataloader.parse(file):
                         original_id = record.id
                         row = results_df.loc[results_df.original_id == original_id]
                         if len(row) == 0:
@@ -258,7 +249,15 @@ class Terrier(Corgi):
         )
 
     @ta.tool
-    def preprocess(self, repbase:Path, seqbank:Path, seqtree:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
+    def preprocess(
+        self, 
+        repbase:Path=ta.Param(..., help="The path to the RepBase fasta directory."), 
+        seqbank:Path=ta.Param(..., help="The path to save the new SeqBank file."), 
+        seqtree:Path=ta.Param(..., help="The path to save the new SeqTree file."), 
+        label_smoothing:float=0.0, 
+        gamma:float=0.0, 
+        partitions:int=5,
+    ):
         seqbank = SeqBank(path=seqbank, write=True)
         assert repbase is not None
         repbase = Path(repbase)
