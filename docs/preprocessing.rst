@@ -28,7 +28,7 @@ These two files can be generated from the Repbase database using the `terrier-to
 
 .. code-block:: bash
 
-    terrier-tools preprocess $REPBASE_DIR $REPBASE_DIR/Repbase-seqbank.sb $REPBASE_DIR/Repbase-seqtree.st
+    terrier-tools preprocess --repbase $REPBASE_DIR --seqbank $REPBASE_DIR/Repbase-seqbank.sb --seqtree $REPBASE_DIR/Repbase-seqtree.st
 
 This will create a SeqBank file called ``Repbase-seqbank.sb`` and a SeqTree files called ``Repbase-seqtree.st`` and place them the ``$REPBASE_DIR``. 
 
