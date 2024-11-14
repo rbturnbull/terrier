@@ -24,6 +24,7 @@ from rich.console import Console
 console = Console()
 
 from .repeatmasker import create_repeatmasker_seqtree
+from .evaluate import build_confusion_matrix, confusion_matrix_fig
 
 
 class Terrier(Corgi):
@@ -98,6 +99,8 @@ class Terrier(Corgi):
         **kwargs,
     ):        
         def node_lineage_string(node) -> str:
+            if node.is_root:
+                return "Unknown"
             return "/".join([str(n) for n in node.ancestors[1:]] + [str(node)])
 
         classification_probabilities = inference.node_probabilities(results[0], root=self.classification_tree)
@@ -276,3 +279,36 @@ class Terrier(Corgi):
             partitions=partitions,
         )
 
+    @ta.tool
+    def confusion_matrix(
+        self, 
+        csv:Path = ta.Param(..., help="The CSV file with the results."),
+        output:Path=ta.Param(default=None, help="A path to write the confusion matrix, can be CSV, HTML or an image file."),
+        superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
+        show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
+        width:int=800,
+        height:int=800,
+        map:str="",
+        ignore:str="",
+        threshold:float=None,
+    ) -> pd.DataFrame:
+        df = pd.read_csv(csv)
+        
+        cm = build_confusion_matrix(df, superfamily=superfamily, map=map, ignore=ignore, threshold=threshold)
+        fig = confusion_matrix_fig(cm, width=width, height=height)
+        if show:
+            fig.show()
+
+        if output:
+            output = Path(output)
+            output.parent.mkdir(exist_ok=True, parents=True)
+            print(f"Writing confusion matrix to: {output}")
+            match output.suffix.lower():
+                case ".csv":
+                    cm.to_csv(output)
+                case ".html":
+                    fig.write_html(str(output))
+                case _:
+                    fig.write_image(str(output), engine="kaleido")
+        
+        return cm
