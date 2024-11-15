@@ -24,7 +24,7 @@ from rich.console import Console
 console = Console()
 
 from .repeatmasker import create_repeatmasker_seqtree
-from .evaluate import build_confusion_matrix, confusion_matrix_fig
+from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig
 
 
 class Terrier(Corgi):
@@ -278,6 +278,35 @@ class Terrier(Corgi):
             gamma=gamma,
             partitions=partitions,
         )
+
+    @ta.tool
+    def threshold_plot(
+        self, 
+        csv:Path = ta.Param(..., help="The CSV file with the results."),
+        output:Path=ta.Param(default=None, help="A path to write the confusion matrix, can be HTML or an image file."),
+        superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
+        show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
+        width:int=800,
+        height:int=800,
+        map:str="",
+        ignore:str="",
+    ) -> pd.DataFrame:
+        df = pd.read_csv(csv)
+        
+        fig = threshold_fig(df, superfamily=superfamily, map=map, ignore=ignore, width=width, height=height)
+        if show:
+            fig.show()
+
+        if output:
+            output = Path(output)
+            output.parent.mkdir(exist_ok=True, parents=True)
+            print(f"Writing threshold figure to: {output}")
+            match output.suffix.lower():
+                case ".html":
+                    fig.write_html(str(output))
+                case _:
+                    fig.write_image(str(output), engine="kaleido")
+
 
     @ta.tool
     def confusion_matrix(

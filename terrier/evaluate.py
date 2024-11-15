@@ -61,7 +61,7 @@ def format_fig(fig):
     return fig
 
 
-def build_confusion_matrix(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", ignore:str|list[str]="", threshold:float|None=None) -> pd.DataFrame:
+def evaluate_results(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", ignore:str|list[str]="", threshold:float|None=None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     if isinstance(map, str):
         map = build_map(map)
     
@@ -81,12 +81,13 @@ def build_confusion_matrix(data:pd.DataFrame, superfamily:bool=True, map:str|dic
     # Filter predictions
     if threshold is not None:
         data = data[data['probability'] >= threshold]
-    data = data[~data['greedy_prediction'].isin(ignore)]
+    # data = data[~data['greedy_prediction'].isin(ignore)]
     prediction_total = len(data)
     print(f"Number classified: {prediction_total}/{ground_truth_total} ({prediction_total/ground_truth_total:.2%})")
 
     actual = data['original_classification']
     predicted = data['greedy_prediction']
+    probability = data['probability'].to_numpy()
     
     if not superfamily:
         # Map classes to order level
@@ -100,7 +101,41 @@ def build_confusion_matrix(data:pd.DataFrame, superfamily:bool=True, map:str|dic
     # count the correct predictions
     correct = (actual == predicted).sum()
     print(f"Correct predictions: {correct}/{prediction_total} ({correct/prediction_total:.2%})")
-    
+
+    return actual, predicted, probability
+
+
+def threshold_fig(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", ignore:str|list[str]="", width:int=800, height:int=800) -> go.Figure:
+    actual, predicted, probability = evaluate_results(data, superfamily, map, ignore, threshold=None)
+    df = pd.DataFrame({"actual": actual, "predicted": predicted, "probability": probability})
+    df = df.sort_values("probability", ascending=False)
+
+    df["classified"] = (np.arange(len(df))+1)/len(df)
+    df["correct"] = (df["actual"] == df["predicted"]).cumsum()/(np.arange(len(df))+1)
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df["probability"], y=df["correct"], mode='lines', name='Correct'))
+    fig.add_trace(go.Scatter(x=df["probability"], y=df["classified"], mode='lines', name='Classified'))
+    format_fig(fig)
+    fig.update_xaxes(title="Threshold")
+    fig.update_yaxes(title="Percentage of dataset", tickformat=".0%")
+    fig.update_layout(
+        autosize=False,
+        width=width,
+        height=height,
+        legend=dict(
+            yanchor="bottom",
+            y=0.01,
+            xanchor="left",
+            x=0.01,
+        ),
+    )
+
+    return fig
+
+
+def build_confusion_matrix(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", ignore:str|list[str]="", threshold:float|None=None) -> pd.DataFrame:
+    actual, predicted, _ = evaluate_results(data, superfamily, map, ignore, threshold)
     labels = sorted(set(actual) | set(predicted))
     
     # Create a confusion matrix
@@ -127,3 +162,5 @@ def confusion_matrix_fig(confusion_matrix:pd.DataFrame, width:int=800, height:in
     fig.update_xaxes(title="Predicted")
     fig.update_yaxes(title="Ground Truth")
     return fig
+
+
