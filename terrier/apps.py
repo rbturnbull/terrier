@@ -24,7 +24,7 @@ from rich.console import Console
 console = Console()
 
 from .repeatmasker import create_repeatmasker_seqtree
-from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig
+from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig, evaluate_results
 
 
 class Terrier(Corgi):
@@ -95,7 +95,7 @@ class Terrier(Corgi):
         image_dir: Path = ta.Param(default=None, help="A directory to output the results as images."),
         image_format:str = "png",
         image_threshold:float = 0.005,
-        prediction_threshold:float = ta.Param(default=0.5, help="The threshold value for making hierarchical predictions."),
+        threshold:float = ta.Param(default=0.7, help="The threshold value for making hierarchical predictions."),
         **kwargs,
     ):        
         def node_lineage_string(node) -> str:
@@ -131,7 +131,7 @@ class Terrier(Corgi):
         greedy_predictions = inference.greedy_predictions(
             classification_probabilities, 
             root=self.classification_tree, 
-            threshold=prediction_threshold,
+            threshold=threshold,
         )
 
         results_df['greedy_prediction'] = [
@@ -280,14 +280,26 @@ class Terrier(Corgi):
         )
 
     @ta.tool
+    def evaluate(
+        self, 
+        csv:Path = ta.Param(..., help="The CSV file with the results."),
+        superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
+        map:str="",
+        ignore:str="",
+        threshold:float=None,
+    ) -> pd.DataFrame:
+        df = pd.read_csv(csv)
+        return evaluate_results(df, superfamily=superfamily, map=map, ignore=ignore, threshold=threshold)
+
+    @ta.tool
     def threshold_plot(
         self, 
         csv:Path = ta.Param(..., help="The CSV file with the results."),
         output:Path=ta.Param(default=None, help="A path to write the confusion matrix, can be HTML or an image file."),
         superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
         show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
-        width:int=800,
-        height:int=800,
+        width:int=650,
+        height:int=650,
         map:str="",
         ignore:str="",
     ) -> pd.DataFrame:
@@ -315,8 +327,8 @@ class Terrier(Corgi):
         output:Path=ta.Param(default=None, help="A path to write the confusion matrix, can be CSV, HTML or an image file."),
         superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
         show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
-        width:int=800,
-        height:int=800,
+        width:int=750,
+        height:int=750,
         map:str="",
         ignore:str="",
         threshold:float=None,

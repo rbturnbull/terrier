@@ -11,6 +11,8 @@ def build_map(map:str) -> dict[str,str]:
     """
     Builds a dictionary from a string in the form of 'key1=value1|key2=value2'
     """
+    if not map:
+        return {}
     components = map.split(",")
     return {x.split("=")[0]: x.split("=")[1] for x in components}
 
@@ -19,6 +21,8 @@ def build_str_list(string:str) -> list[str]:
     """
     Builds a dictionary from a string in the form of 'key1=value1|key2=value2'
     """
+    if not string:
+        return []
     return [x.strip() for x in string.split(",")]
 
 
@@ -105,7 +109,7 @@ def evaluate_results(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", 
     return actual, predicted, probability
 
 
-def threshold_fig(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", ignore:str|list[str]="", width:int=800, height:int=800) -> go.Figure:
+def threshold_fig(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", ignore:str|list[str]="", width:int=750, height:int=750) -> go.Figure:
     actual, predicted, probability = evaluate_results(data, superfamily, map, ignore, threshold=None)
     df = pd.DataFrame({"actual": actual, "predicted": predicted, "probability": probability})
     df = df.sort_values("probability", ascending=False)
@@ -130,6 +134,7 @@ def threshold_fig(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", ign
             x=0.01,
         ),
     )
+    fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
 
     return fig
 
@@ -143,13 +148,13 @@ def build_confusion_matrix(data:pd.DataFrame, superfamily:bool=True, map:str|dic
     return pd.DataFrame(cm, index=labels, columns=labels)
 
 
-def confusion_matrix_fig(confusion_matrix:pd.DataFrame, width:int=800, height:int=800) -> go.Figure:
+def confusion_matrix_fig(confusion_matrix:pd.DataFrame, width:int=750, height:int=750) -> go.Figure:
     # Normalize the confusion matrix (so long as there are no 0s in the denominator)
     sums = confusion_matrix.sum(axis=1).to_numpy()[:,None]
     zz = confusion_matrix.to_numpy()/np.maximum(sums, 1)
     
     z_text = [[str(y) for y in x] for x in confusion_matrix.to_numpy()]
-    fig = px.imshow(zz, x=confusion_matrix.index, y=confusion_matrix.columns, color_continuous_scale='Viridis', aspect="equal", labels=dict(color="Sensitivity"))
+    fig = px.imshow(zz, x=confusion_matrix.index, y=confusion_matrix.columns, color_continuous_scale='Viridis', aspect="equal", labels=dict(color="Recall"))
     fig.update_traces(text=z_text, texttemplate="%{text}")
 
     format_fig(fig)
@@ -158,6 +163,8 @@ def confusion_matrix_fig(confusion_matrix:pd.DataFrame, width:int=800, height:in
         width=width,
         height=height,
     )
+    # Set margins to zero
+    fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
     fig.update_xaxes(side="top")
     fig.update_xaxes(title="Predicted")
     fig.update_yaxes(title="Ground Truth")
