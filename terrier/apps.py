@@ -1,24 +1,13 @@
 import pandas as pd
-from typing import List
-import lightning as L
-from functools import partial
 from pathlib import Path
-from torch import nn
 import torchapp as ta
 from torchmetrics import Metric
 from hierarchicalsoftmax.metrics import RankAccuracyTorchMetric
-from hierarchicalsoftmax import HierarchicalSoftmaxLoss, SoftmaxNode
-from hierarchicalsoftmax import metrics, inference, greedy_predictions
+from hierarchicalsoftmax import inference
 import torch
-
-# from corgi.models import ConvClassifier
-# from corgi.dataloaders import SeqIODataloader
 from Bio import SeqIO
-from rich.progress import track
 from seqbank import SeqBank
 from corgi import Corgi
-from corgi.seqtree import SeqTree
-from polytorch.metrics import HierarchicalGreedyAccuracy
 
 from rich.console import Console
 console = Console()
@@ -35,42 +24,6 @@ class Terrier(Corgi):
     def data(self, **kwargs):
         data = super().data(**kwargs)
         return data
-
-    # def data(
-    #     self,
-    #     seqtree: Path = ta.Param(help="The seqtree which has the sequences to use."),
-    #     seqbank:Path = ta.Param(help="The HDF5 file with the sequences."),
-    #     validation_partition:int = ta.Param(default=1, help="The partition to use for validation."),
-    #     batch_size: int = ta.Param(default=32, help="The batch size."),
-    #     phi:float=ta.Param(default=1.0, tune=True, tune_max=1.2, tune_min=0.8, help="A multiplication factor for the loss at each level of the tree."),
-    #     min_length:int = 64,
-    #     max_length:int = 4096,
-    #     deform_lambda:float = ta.Param(default=None, help="The lambda for the deform transform."),
-    #     tips_mode:bool = True,
-    # ) -> DataLoaders:
-    #     """
-    #     Creates a Pytorch Lightning Data Module which Terrier uses in training and validation.
-
-    #     Returns:
-    #         DataLoaders: The DataLoaders object.
-    #     """
-    #     self.validation_partition = validation_partition
-    #     dls = super().dataloaders(
-    #         seqtree=seqtree,
-    #         seqbank=seqbank,
-    #         validation_partition=validation_partition,
-    #         batch_size=batch_size,
-    #         # dataloader_type=dataloader_type,
-    #         # deform_lambda=deform_lambda,
-    #         tips_mode=tips_mode,
-    #         phi=phi,
-    #     )
-        
-    #     before_batch = Pipeline(PadBatch(min_length=min_length, max_length=max_length))
-    #     dls.train.before_batch = before_batch
-    #     dls.valid.before_batch = before_batch
-        
-    #     return dls
 
     @ta.method    
     def metrics(self) -> list[tuple[str,Metric]]:
@@ -237,9 +190,8 @@ class Terrier(Corgi):
 
         return results_df
 
-    def pretrained_location(self) -> str:
-        raise NotImplementedError
-        return "https://github.com/rbturnbull/terrier/releases/download/v0.1.1-alpha/terrier-0.1.pkl"
+    def checkpoint(self) -> str:
+        return "https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt"
     
     @ta.tool
     def create_repeatmasker_seqtree(self, output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
