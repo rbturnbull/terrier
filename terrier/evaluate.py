@@ -128,7 +128,7 @@ def threshold_fig(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", ign
     fig.add_trace(go.Scatter(x=df["probability"], y=df["classified"], mode='lines', name='Classified'))
     format_fig(fig)
     fig.update_xaxes(title="Threshold")
-    fig.update_yaxes(title="Percentage of dataset", tickformat=".0%")
+    fig.update_yaxes(title="Percentage of dataset", tickformat=".0%", range=[0, 1])
     fig.update_layout(
         autosize=False,
         width=width,

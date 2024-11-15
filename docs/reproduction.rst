@@ -23,11 +23,16 @@ Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --file drosophila.final.TEs.fa --output drosophila-terrier.final.TEs.csv --threshold 0
+   terrier --file drosophila.final.TEs.fa \
+        --output-csv drosophila-terrier.final.TEs.csv \
+        --min-length 0 \
+        --threshold 0
 
 .. note::
 
    We set the theshold to zero so that we can see all the predictions, the threshold can be adjusted in the evaluation steps below.
+   We also set the minimum length to zero to include all the sequences in the evaluation. 
+   By default, Terrier will only evaluate sequences with a minimum length of 128.
 
 Now evaluate the results with the following command:
 
@@ -35,17 +40,20 @@ Now evaluate the results with the following command:
 
    terrier-tools evaluate --csv drosophila-terrier.final.TEs.csv  \
         --threshold 0.7 \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC \
-        --ignore Unknown
-
+        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC 
+        
 That will produce the following output:
 
 .. code-block:: text
 
-    Total: 619
-    Total with ground truth: 613
-    Number classified: 412/613 (67.21%)
-    Correct predictions: 375/412 (91.02%)
+    Total: 667
+    Total with ground truth: 667
+    Number classified: 428/667 (64.17%)
+    Correct predictions: 386/428 (90.19%)
+
+.. note::
+
+   The dataset includes six sequences with the 'Unknown' label. If you wish to exclude these, you can use the `--ignore Unknown` flag.
 
 To get the accuracy results just for the 'Order' level and ignoring the 'Superfamily' level, use the following command:
 
@@ -54,17 +62,16 @@ To get the accuracy results just for the 'Order' level and ignoring the 'Superfa
    terrier-tools evaluate --csv drosophila-terrier.final.TEs.csv  \
         --threshold 0.7 \
         --no-superfamily \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC \
-        --ignore Unknown
+        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
 .. code-block:: text
 
-    Total: 619
-    Total with ground truth: 613
-    Number classified: 511/613 (83.36%)
-    Correct predictions: 458/511 (89.63%)
+    Total: 667
+    Total with ground truth: 667
+    Number classified: 544/667 (81.56%)
+    Correct predictions: 474/544 (87.13%)
 
 To generate a confusion matrix, use the following command:
 
@@ -73,8 +80,7 @@ To generate a confusion matrix, use the following command:
    terrier-tools confusion-matrix --csv drosophila-terrier.final.TEs.csv  \
         --output drosophila-terrier-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC \
-        --ignore Unknown
+        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -91,8 +97,7 @@ To see the effect of the threshold on the results, you can run the following com
 
    terrier-tools threshold-plot --csv drosophila-terrier.final.TEs.csv  \
         --output drosophila-terrier-threshold-plot.html \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC \
-        --ignore Unknown
+        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -113,11 +118,12 @@ Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --file oryza.final.TEs.fa --output oryza-terrier.final.TEs.csv --threshold 0
+   terrier --file oryza.final.TEs.fa --output-csv oryza-terrier.final.TEs.csv --threshold 0
 
 .. note::
 
    We set the theshold to zero so that we can see all the predictions, the threshold can be adjusted in the evaluation steps below.
+   We can use the default minimum length because the sequences are long enough.
 
 Now evaluate the results with the following command:
 
@@ -125,8 +131,7 @@ Now evaluate the results with the following command:
 
    terrier-tools evaluate --csv oryza-terrier.final.TEs.csv  \
         --threshold 0.7 \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC \
-        --ignore Unknown
+        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
@@ -144,8 +149,7 @@ To get the accuracy results just for the 'Order' level and ignoring the 'Superfa
    terrier-tools evaluate --csv oryza-terrier.final.TEs.csv  \
         --threshold 0.7 \
         --no-superfamily \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC \
-        --ignore Unknown
+        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
@@ -163,8 +167,7 @@ To generate a confusion matrix, use the following command:
    terrier-tools confusion-matrix --csv oryza-terrier.final.TEs.csv  \
         --output oryza-terrier-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC \
-        --ignore Unknown
+        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -181,8 +184,7 @@ To see the effect of the threshold on the results, you can run the following com
 
    terrier-tools threshold-plot --csv oryza-terrier.final.TEs.csv  \
         --output oryza-terrier-threshold-plot.html \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC \
-        --ignore Unknown
+        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
