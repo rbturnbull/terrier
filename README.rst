@@ -13,7 +13,7 @@
 .. |black badge| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
     
-.. |coverage badge| image:: https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rbturnbull//raw/coverage-badge.json
+.. |coverage badge| image:: https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rbturnbull/5e0c3115955fde132a8b7c131da68b86/raw/coverage-badge.json
     :target: https://rbturnbull.github.io/terrier/coverage/
 
 .. |torchapp badge| image:: https://img.shields.io/badge/MLOpps-torchapp-B1230A.svg
