@@ -20,7 +20,6 @@ classifiers = [
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
 numpy = "<2.0.0"
-torchapp = ">=0.4.8"
 hierarchicalsoftmax = {git = "https://github.com/rbturnbull/hierarchicalsoftmax.git", branch="torchmetrics"}
 h5py = "^3.8.0"
 bio-corgi = {git = "https://github.com/rbturnbull/corgi.git", branch="lightning"}
