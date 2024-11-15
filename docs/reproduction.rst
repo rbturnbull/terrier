@@ -63,8 +63,8 @@ That will produce the following output:
 
     Total: 619
     Total with ground truth: 613
-    Number classified: 412/613 (67.21%)
-    Correct predictions: 391/412 (94.90%)
+    Number classified: 511/613 (83.36%)
+    Correct predictions: 458/511 (89.63%)
 
 To generate a confusion matrix, use the following command:
 
@@ -136,6 +136,25 @@ That will produce the following output:
     Total with ground truth: 75
     Number classified: 68/75 (90.67%)
     Correct predictions: 67/68 (98.53%)
+
+To get the accuracy results just for the 'Order' level and ignoring the 'Superfamily' level, use the following command:
+
+.. code-block:: bash
+
+   terrier-tools evaluate --csv oryza-terrier.final.TEs.csv  \
+        --threshold 0.7 \
+        --no-superfamily \
+        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC \
+        --ignore Unknown
+
+That will produce the following output:
+
+.. code-block:: text
+
+    Total: 75
+    Total with ground truth: 75
+    Number classified: 71/75 (94.67%)
+    Correct predictions: 67/71 (94.37%)
 
 To generate a confusion matrix, use the following command:
 

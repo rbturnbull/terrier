@@ -76,11 +76,17 @@ def evaluate_results(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", 
     print(f"Total: {total}")
 
     # Remove ignored classes
-    data = data[~data['original_classification'].isin(ignore)]
+    data = data[~data['original_classification'].isin(ignore)].copy()
 
     # Filter ground truth
     ground_truth_total = len(data)
     print(f"Total with ground truth: {ground_truth_total}")
+
+    if not superfamily:
+        exclude_columns = ['file', 'accession', 'greedy_prediction', 'probability', 'original_id', 'original_classification']
+        filtered_columns = [col for col in data.columns if col not in exclude_columns and '/' not in col]
+        data["greedy_prediction"] = data[filtered_columns].idxmax(axis=1)
+        data["probability"] = data[filtered_columns].max(axis=1)
 
     # Filter predictions
     if threshold is not None:
