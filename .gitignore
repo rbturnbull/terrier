@@ -180,3 +180,6 @@ model.pth
 scaphiopus_holbrookii_noMasking.fasta.0.te.csv
 repbase.refs.csv
 logs/
+
+oryza.final.TEs.fa
+oryza-terrier.final.TEs.csv
