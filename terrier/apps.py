@@ -1,152 +1,59 @@
-import re
 import pandas as pd
-from typing import List
-import random
-from functools import partial
 from pathlib import Path
-from torch import nn
-from fastai.data.core import DataLoaders
 import torchapp as ta
-from fastai.learner import load_learner
-from rich.console import Console
-from fastai.data.block import DataBlock, TransformBlock, CategoryBlock
-from fastai.data.transforms import RandomSplitter
-console = Console()
-from hierarchicalsoftmax import HierarchicalSoftmaxLoss, SoftmaxNode
-from hierarchicalsoftmax import metrics, inference, greedy_predictions
+from torchmetrics import Metric
+from hierarchicalsoftmax.metrics import RankAccuracyTorchMetric
+from hierarchicalsoftmax import inference
 import torch
-from corgi.models import ConvClassifier
-from corgi import Corgi
-from corgi.dataloaders import SeqIODataloader
-from fastcore.transform import Pipeline
-from fastcore.foundation import mask2idxs
-from fastai.data.transforms import IndexSplitter
 from Bio import SeqIO
-from rich.progress import track
-from fastai.metrics import accuracy
-from torchapp.apps import call_func
-# from fastai.callback.fp16 import AMPMode
+from seqbank import SeqBank
+from corgi import Corgi
 
-from corgi.seqtree import SeqTree
-# from corgi.dataloaders import DataloaderType
-from .models import VectorOutput
+from rich.console import Console
+console = Console()
 
-from .loss import FocalLoss
-from .famdb import FamDB
-from .dataloaders import MaskedDataloader, PadBatch
-from polytorch.metrics import HierarchicalGreedyAccuracy
-
-# def greedy_attribute_accuracy(prediction_tensor, target_tensor, root, attribute):
-#     prediction_nodes = inference.greedy_predictions(prediction_tensor=prediction_tensor, root=root)
-#     prediction_attributes = torch.as_tensor( [getattr(node, attribute) for node in prediction_nodes], dtype=int).to(target_tensor.device)
-
-#     target_nodes = [root.node_list[target] for target in target_tensor]
-#     target_attributes = torch.as_tensor( [getattr(node, attribute) for node in target_nodes], dtype=int).to(target_tensor.device)
-
-#     return (prediction_attributes == target_attributes).float().mean()
-
+from .repeatmasker import create_repeatmasker_seqtree
+from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig, evaluate_results
 
 
 class Terrier(Corgi):
     """
     Transposable Element Repeat Result classifIER
     """
-    def dataloaders(
-        self,
-        seqtree: Path = ta.Param(help="The seqtree which has the sequences to use."),
-        seqbank:Path = ta.Param(help="The HDF5 file with the sequences."),
-        validation_partition:int = ta.Param(default=1, help="The partition to use for validation."),
-        batch_size: int = ta.Param(default=32, help="The batch size."),
-        phi:float=ta.Param(default=1.0, tune=True, tune_max=1.2, tune_min=0.8, help="A multiplication factor for the loss at each level of the tree."),
-        # dataloader_type: DataloaderType = ta.Param(
-        #     default=DataloaderType.PLAIN, case_sensitive=False
-        # ),
-        min_length:int = 64,
-        max_length:int = 4096,
-        deform_lambda:float = ta.Param(default=None, help="The lambda for the deform transform."),
-        tips_mode:bool = True,
-    ) -> DataLoaders:
-        """
-        Creates a FastAI DataLoaders object which Terrier uses in training and prediction.
+    @ta.method("super")
+    def data(self, **kwargs):
+        data = super().data(**kwargs)
+        return data
 
-        Returns:
-            DataLoaders: The DataLoaders object.
-        """
-        self.validation_partition = validation_partition
-        dls = super().dataloaders(
-            seqtree=seqtree,
-            seqbank=seqbank,
-            validation_partition=validation_partition,
-            batch_size=batch_size,
-            # dataloader_type=dataloader_type,
-            # deform_lambda=deform_lambda,
-            tips_mode=tips_mode,
-            phi=phi,
+    @ta.method    
+    def metrics(self) -> list[tuple[str,Metric]]:
+        rank_accuracy = RankAccuracyTorchMetric(
+            root=self.classification_tree, 
+            ranks={1:"accuracy_repeatmasker_type", 2:"accuracy_repeatmasker_subtype"},
         )
-        
-        before_batch = Pipeline(PadBatch(min_length=min_length, max_length=max_length))
-        dls.train.before_batch = before_batch
-        dls.valid.before_batch = before_batch
-        
-        return dls
-
-    def inference_dataloader(
-        self,
-        learner,
-        file: List[Path] = ta.Param(None, help="A file with sequences to be classified."),
-        max_seqs: int = None,
-        max_length:int=25_000,
-        batch_size:int = 1,
-        format:str = "",
-        **kwargs,
-    ):        
-        # learner.amp_mode = AMPMode.FP16 # hack for different versions of fastai
-
-        self.dataloader = SeqIODataloader(
-            files=file, 
-            device=learner.dls.device, 
-            batch_size=batch_size, 
-            min_length=64,
-            max_length=max_length,
-            max_seqs=max_seqs,
-            format=format,
-        )
-
-        # self.masked_dataloader = MaskedDataloader(files=fasta, format="fasta", device=learner.dls.device, batch_size=batch_size, min_length=128, max_seqs=max_seqs, max_repeats=max_repeats)
-        # only works for repbase
-        return self.dataloader
-
-    def metrics(self):
-        return [
-            HierarchicalGreedyAccuracy(root=self.classification_tree, max_depth=1, data_index=0, name="accuracy_repeatmasker_type"),
-            HierarchicalGreedyAccuracy(root=self.classification_tree, max_depth=2, data_index=0, name="accuracy_repeatmasker_subtype"),
-        ]        
+                
+        return [('rank_accuracy', rank_accuracy)]
     
+    @ta.method
     def monitor(self):
         return "accuracy_repeatmasker_subtype"
 
+    @ta.method
     def output_results(
         self,
         results,
-        seqtree:Path=None,
-        # repeat_masker_out:Path = ta.Param(default=None, help="The .out file from repeat masker."),
-        # repeat_masker_replace:Path = ta.Param(default=None, help="A path to write a replacement repeat masker out file."),
         output_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
         output_tips_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV which only stores the probabilities at the tips."),
         output_fasta: Path = ta.Param(default=None, help="A path to output the results in FASTA format."),
         image_dir: Path = ta.Param(default=None, help="A directory to output the results as images."),
         image_format:str = "png",
         image_threshold:float = 0.005,
-        prediction_threshold:float = ta.Param(default=0.5, help="The threshold value for making hierarchical predictions."),
+        threshold:float = ta.Param(default=0.7, help="The threshold value for making hierarchical predictions."),
         **kwargs,
-    ):
-        if seqtree is None:
-            seqtree = Path(__file__).parent/"data/repbase28.10.st"
-
-        seqtree = SeqTree.load(seqtree)
-        self.classification_tree = seqtree.classification_tree
-        
+    ):        
         def node_lineage_string(node) -> str:
+            if node.is_root:
+                return "Unknown"
             return "/".join([str(n) for n in node.ancestors[1:]] + [str(node)])
 
         classification_probabilities = inference.node_probabilities(results[0], root=self.classification_tree)
@@ -177,7 +84,7 @@ class Terrier(Corgi):
         greedy_predictions = inference.greedy_predictions(
             classification_probabilities, 
             root=self.classification_tree, 
-            threshold=prediction_threshold,
+            threshold=threshold,
         )
 
         results_df['greedy_prediction'] = [
@@ -213,6 +120,7 @@ class Terrier(Corgi):
                 accession = row['accession']
                 image_path = image_dir / Path(filepath).name / f"{accession}.{image_format}"
                 image_paths.append(image_path)
+                
             inference.render_probabilities(
                 root=self.classification_tree, 
                 filepaths=image_paths,
@@ -230,7 +138,7 @@ class Terrier(Corgi):
             output_fasta.parent.mkdir(exist_ok=True, parents=True)
             with open(output_fasta, "w") as fasta_out:
                 for file in self.dataloader.files:
-                    for record in SeqIO.parse(file, "fasta"):
+                    for record in self.dataloader.parse(file):
                         original_id = record.id
                         row = results_df.loc[results_df.original_id == original_id]
                         if len(row) == 0:
@@ -282,8 +190,118 @@ class Terrier(Corgi):
 
         return results_df
 
-    def pretrained_location(self) -> str:
-        return "https://github.com/rbturnbull/terrier/releases/download/v0.1.1-alpha/terrier-0.1.pkl"
+    def checkpoint(self, checkpoint:Path=None) -> str:
+        return checkpoint or "https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt"
     
-    # def monitor(self):
-    #     return ""
+    @ta.tool
+    def create_repeatmasker_seqtree(self, output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
+        return create_repeatmasker_seqtree(
+            output=output,
+            repbase=repbase,
+            label_smoothing=label_smoothing,
+            gamma=gamma,
+            partitions=partitions,
+        )
+
+    @ta.tool
+    def preprocess(
+        self, 
+        repbase:Path=ta.Param(..., help="The path to the RepBase fasta directory."), 
+        seqbank:Path=ta.Param(..., help="The path to save the new SeqBank file."), 
+        seqtree:Path=ta.Param(..., help="The path to save the new SeqTree file."), 
+        label_smoothing:float=0.0, 
+        gamma:float=0.0, 
+        partitions:int=5,
+    ):
+        seqbank = SeqBank(path=seqbank, write=True)
+        assert repbase is not None
+        repbase = Path(repbase)
+        assert repbase.exists()
+
+        # Create the seqbank from the FASTA files with .ref extension
+        files = list(repbase.glob('*.ref'))
+        seqbank.add_files(files, format="fasta")
+
+        # Create the seqtree
+        return create_repeatmasker_seqtree(
+            output=seqtree,
+            repbase=repbase,
+            label_smoothing=label_smoothing,
+            gamma=gamma,
+            partitions=partitions,
+        )
+
+    @ta.tool
+    def evaluate(
+        self, 
+        csv:Path = ta.Param(..., help="The CSV file with the results."),
+        superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
+        map:str="",
+        ignore:str="",
+        threshold:float=None,
+    ) -> pd.DataFrame:
+        df = pd.read_csv(csv)
+        return evaluate_results(df, superfamily=superfamily, map=map, ignore=ignore, threshold=threshold)
+
+    @ta.tool
+    def threshold_plot(
+        self, 
+        csv:Path = ta.Param(..., help="The CSV file with the results."),
+        output:Path=ta.Param(default=None, help="A path to write the confusion matrix, can be HTML or an image file."),
+        superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
+        show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
+        width:int=650,
+        height:int=650,
+        map:str="",
+        ignore:str="",
+    ) -> pd.DataFrame:
+        df = pd.read_csv(csv)
+        
+        fig = threshold_fig(df, superfamily=superfamily, map=map, ignore=ignore, width=width, height=height)
+        if show:
+            fig.show()
+
+        if output:
+            output = Path(output)
+            output.parent.mkdir(exist_ok=True, parents=True)
+            print(f"Writing threshold figure to: {output}")
+            match output.suffix.lower():
+                case ".html":
+                    fig.write_html(str(output))
+                case _:
+                    fig.write_image(str(output), engine="kaleido")
+
+
+    @ta.tool
+    def confusion_matrix(
+        self, 
+        csv:Path = ta.Param(..., help="The CSV file with the results."),
+        output:Path=ta.Param(default=None, help="A path to write the confusion matrix, can be CSV, HTML or an image file."),
+        superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
+        show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
+        width:int=750,
+        height:int=750,
+        map:str="",
+        ignore:str="",
+        threshold:float=None,
+    ) -> pd.DataFrame:
+        df = pd.read_csv(csv)
+        
+        cm = build_confusion_matrix(df, superfamily=superfamily, map=map, ignore=ignore, threshold=threshold)
+        fig = confusion_matrix_fig(cm, width=width, height=height)
+        if show:
+            fig.show()
+
+        if output:
+            output = Path(output)
+            output.parent.mkdir(exist_ok=True, parents=True)
+            print(f"Writing confusion matrix to: {output}")
+            match output.suffix.lower():
+                case ".csv":
+                    cm.to_csv(output)
+                case ".html":
+                    fig.write_html(str(output))
+                case _:
+                    fig.write_image(str(output), engine="kaleido")
+        
+        return cm

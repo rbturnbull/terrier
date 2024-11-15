@@ -19,6 +19,9 @@ Classifier of Repeats
    :caption: Contents:
 
    quickstart
+   preprocessing
+   training
+   reproduction
    api
    cli
    credits
