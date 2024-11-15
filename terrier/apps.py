@@ -190,8 +190,8 @@ class Terrier(Corgi):
 
         return results_df
 
-    def checkpoint(self) -> str:
-        return "https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt"
+    def checkpoint(self, checkpoint:Path=None) -> str:
+        return checkpoint or "https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt"
     
     @ta.tool
     def create_repeatmasker_seqtree(self, output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
