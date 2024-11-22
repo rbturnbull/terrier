@@ -76,6 +76,7 @@ def evaluate_results(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", 
     print(f"Total: {total}")
 
     # Remove ignored classes
+    data = data.fillna('')
     data = data[~data['original_classification'].isin(ignore)].copy()
 
     # Filter ground truth
@@ -83,21 +84,24 @@ def evaluate_results(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", 
     print(f"Total with ground truth: {ground_truth_total}")
 
     if not superfamily:
-        exclude_columns = ['file', 'accession', 'greedy_prediction', 'probability', 'original_id', 'original_classification']
+        exclude_columns = ['file', 'accession', 'prediction', 'probability', 'original_id', 'original_classification']
         filtered_columns = [col for col in data.columns if col not in exclude_columns and '/' not in col]
-        data["greedy_prediction"] = data[filtered_columns].idxmax(axis=1)
+        data["prediction"] = data[filtered_columns].idxmax(axis=1)
         data["probability"] = data[filtered_columns].max(axis=1)
 
     # Filter predictions
     if threshold is not None:
         data = data[data['probability'] >= threshold]
-    # data = data[~data['greedy_prediction'].isin(ignore)]
+    
+    # Ignore empty predictions
+    data = data[data['prediction'] != ""]
+
     prediction_total = len(data)
     print(f"Number classified: {prediction_total}/{ground_truth_total} ({prediction_total/ground_truth_total:.2%})")
 
     actual = data['original_classification']
-    predicted = data['greedy_prediction']
-    probability = data['probability'].to_numpy()
+    predicted = data['prediction']
+    probability = data['probability'].to_numpy() if 'probability' in data.columns else np.ones(len(data))
     
     if not superfamily:
         # Map classes to order level

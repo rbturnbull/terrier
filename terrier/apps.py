@@ -59,8 +59,6 @@ class Terrier(Corgi):
         classification_probabilities = inference.node_probabilities(results[0], root=self.classification_tree)
         category_names = [node_lineage_string(node) for node in self.classification_tree.node_list if not node.is_root]
 
-        # greedy_predictions = inference.greedy_predictions(results[0], root=self.classification_tree)
-
         chunk_details = pd.DataFrame(self.dataloader.chunk_details, columns=["file", "original_id", "chunk"])
         predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=category_names)
 
@@ -87,7 +85,7 @@ class Terrier(Corgi):
             threshold=threshold,
         )
 
-        results_df['greedy_prediction'] = [
+        results_df['prediction'] = [
             node_lineage_string(node)
             for node in greedy_predictions
         ]
@@ -99,7 +97,7 @@ class Terrier(Corgi):
             return "null"
         
         def get_prediction_probability(row):
-            prediction = row["greedy_prediction"]
+            prediction = row["prediction"]
             if prediction in row:
                 return row[prediction]
             return 1.0
@@ -108,7 +106,7 @@ class Terrier(Corgi):
         results_df['original_classification'] = results_df['original_id'].apply(get_original_classification)
 
         # Reorder columns
-        results_df = results_df[["file", "accession", "greedy_prediction", "probability", "original_id", "original_classification" ] + category_names]
+        results_df = results_df[["file", "accession", "prediction", "probability", "original_id", "original_classification" ] + category_names]
 
         # Output images
         if image_dir:
@@ -147,7 +145,7 @@ class Terrier(Corgi):
 
                         accession = row['accession'].item()
                         original_classification = row["original_classification"].item()
-                        prediction = row["greedy_prediction"].item()
+                        prediction = row["prediction"].item()
                         
                         new_id = f"{accession}#{prediction}"
                         record.id = new_id
