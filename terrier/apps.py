@@ -13,7 +13,7 @@ from rich.console import Console
 console = Console()
 
 from .repeatmasker import create_repeatmasker_seqtree
-from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig, evaluate_results
+from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig, evaluate_results, DEFAULT_HEIGHT, DEFAULT_WIDTH
 
 
 class Terrier(Corgi):
@@ -235,7 +235,7 @@ class Terrier(Corgi):
         csv:Path = ta.Param(..., help="The CSV file with the results."),
         superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
         map:str="",
-        ignore:str="",
+        ignore:str="Unknown",
         threshold:float=None,
     ) -> pd.DataFrame:
         df = pd.read_csv(csv)
@@ -248,10 +248,10 @@ class Terrier(Corgi):
         output:Path=ta.Param(default=None, help="A path to write the confusion matrix, can be HTML or an image file."),
         superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
         show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
-        width:int=650,
-        height:int=650,
+        width:int=DEFAULT_WIDTH,
+        height:int=DEFAULT_HEIGHT,
         map:str="",
-        ignore:str="",
+        ignore:str="Unknown",
     ) -> pd.DataFrame:
         df = pd.read_csv(csv)
         
@@ -277,16 +277,16 @@ class Terrier(Corgi):
         output:Path=ta.Param(default=None, help="A path to write the confusion matrix, can be CSV, HTML or an image file."),
         superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
         show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
-        width:int=750,
-        height:int=750,
+        width:int=DEFAULT_WIDTH,
+        height:int=DEFAULT_HEIGHT,
         map:str="",
-        ignore:str="",
+        ignore:str="Unknown",
         threshold:float=None,
     ) -> pd.DataFrame:
         df = pd.read_csv(csv)
         
         cm = build_confusion_matrix(df, superfamily=superfamily, map=map, ignore=ignore, threshold=threshold)
-        fig = confusion_matrix_fig(cm, width=width, height=height)
+        fig = confusion_matrix_fig(cm, width=width, height=height, title=f"{csv.name} Confusion Matrix")
         if show:
             fig.show()
 
