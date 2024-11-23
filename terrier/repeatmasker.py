@@ -1,16 +1,11 @@
-import typer
 from pathlib import Path
 from hierarchicalsoftmax import SoftmaxNode
 from Bio import SeqIO
-from typing import Dict
-import csv
 import toml
-from corgi.seqtree import SeqTree #, AlreadyExists
+from corgi.seqtree import SeqTree
 from collections import Counter
 
-app = typer.Typer()
 
-@app.command()
 def create_repeatmasker_seqtree(output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
     with open(Path(__file__).parent/"data/repbase-to-repeatmasker.toml", "r") as f:
         mapping = toml.load(f)
@@ -83,17 +78,3 @@ def create_repeatmasker_seqtree(output:Path, repbase:Path, label_smoothing:float
     seqtree.classification_tree.render(print=1)
 
 
-def print_name(path:Path):
-    seqtree = SeqTree.load(path)
-
-    data = {}
-
-    for accession in seqtree:
-        node = seqtree.node(accession)
-        data[accession] = getattr(node, 'repeat_masker_name', str(node))
-
-    print(json.dumps(data, indent=2))
-
-
-if __name__ == "__main__":
-    app()
