@@ -24,6 +24,7 @@ hierarchicalsoftmax = {git = "https://github.com/rbturnbull/hierarchicalsoftmax.
 h5py = "^3.8.0"
 bio-corgi = {git = "https://github.com/rbturnbull/corgi.git", branch="lightning"}
 pyfastx = "^1.1.0"
+toml = "^0.10.2"
 
 [tool.poetry.dev-dependencies]
 pytest = ">=6.2.5"

@@ -13,7 +13,7 @@ from rich.console import Console
 console = Console()
 
 from .repeatmasker import create_repeatmasker_seqtree
-from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig, evaluate_results
+from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig, evaluate_results, DEFAULT_HEIGHT, DEFAULT_WIDTH
 
 
 class Terrier(Corgi):
@@ -60,8 +60,6 @@ class Terrier(Corgi):
         classification_probabilities = inference.node_probabilities(results[0], root=self.classification_tree)
         category_names = [node_lineage_string(node) for node in self.classification_tree.node_list if not node.is_root]
 
-        # greedy_predictions = inference.greedy_predictions(results[0], root=self.classification_tree)
-
         chunk_details = pd.DataFrame(self.dataloader.chunk_details, columns=["file", "original_id", "chunk"])
         predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=category_names)
 
@@ -88,7 +86,7 @@ class Terrier(Corgi):
             threshold=threshold,
         )
 
-        results_df['greedy_prediction'] = [
+        results_df['prediction'] = [
             node_lineage_string(node)
             for node in greedy_predictions
         ]
@@ -100,7 +98,7 @@ class Terrier(Corgi):
             return "null"
         
         def get_prediction_probability(row):
-            prediction = row["greedy_prediction"]
+            prediction = row["prediction"]
             if prediction in row:
                 return row[prediction]
             return 1.0
@@ -109,7 +107,7 @@ class Terrier(Corgi):
         results_df['original_classification'] = results_df['original_id'].apply(get_original_classification)
 
         # Reorder columns
-        results_df = results_df[["file", "accession", "greedy_prediction", "probability", "original_id", "original_classification" ] + category_names]
+        results_df = results_df[["file", "accession", "prediction", "probability", "original_id", "original_classification" ] + category_names]
 
         # Output images
         if image_dir:
@@ -149,6 +147,7 @@ class Terrier(Corgi):
                         accession = row['accession'].item()
                         original_classification = row["original_classification"].item().strip()
                         prediction = row["greedy_prediction"].item()
+                        prediction = row["prediction"].item()
                         
                         if not unknown_only or original_classification.lower() == "unknown":
                             record.id = f"{accession}#{prediction}"
@@ -246,7 +245,7 @@ class Terrier(Corgi):
         csv:Path = ta.Param(..., help="The CSV file with the results."),
         superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
         map:str="",
-        ignore:str="",
+        ignore:str="Unknown",
         threshold:float=None,
     ) -> pd.DataFrame:
         df = pd.read_csv(csv)
@@ -259,10 +258,10 @@ class Terrier(Corgi):
         output:Path=ta.Param(default=None, help="A path to write the confusion matrix, can be HTML or an image file."),
         superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
         show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
-        width:int=650,
-        height:int=650,
+        width:int=DEFAULT_WIDTH,
+        height:int=DEFAULT_HEIGHT,
         map:str="",
-        ignore:str="",
+        ignore:str="Unknown",
     ) -> pd.DataFrame:
         df = pd.read_csv(csv)
         
@@ -288,16 +287,16 @@ class Terrier(Corgi):
         output:Path=ta.Param(default=None, help="A path to write the confusion matrix, can be CSV, HTML or an image file."),
         superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
         show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
-        width:int=750,
-        height:int=750,
+        width:int=DEFAULT_WIDTH,
+        height:int=DEFAULT_HEIGHT,
         map:str="",
-        ignore:str="",
+        ignore:str="Unknown",
         threshold:float=None,
     ) -> pd.DataFrame:
         df = pd.read_csv(csv)
         
         cm = build_confusion_matrix(df, superfamily=superfamily, map=map, ignore=ignore, threshold=threshold)
-        fig = confusion_matrix_fig(cm, width=width, height=height)
+        fig = confusion_matrix_fig(cm, width=width, height=height, title=f"{csv.name} Confusion Matrix")
         if show:
             fig.show()
 

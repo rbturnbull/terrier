@@ -22,6 +22,7 @@ Classifier of Repeats
    preprocessing
    training
    reproduction
+   comparison
    api
    cli
    credits
