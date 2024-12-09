@@ -45,6 +45,7 @@ class Terrier(Corgi):
         output_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV."),
         output_tips_csv: Path = ta.Param(default=None, help="A path to output the results as a CSV which only stores the probabilities at the tips."),
         output_fasta: Path = ta.Param(default=None, help="A path to output the results in FASTA format."),
+        unknown_only:bool = ta.Param(default=None, help="Whether or not to only rename the 'Unknown' sequences in the FASTA file."),
         image_dir: Path = ta.Param(default=None, help="A directory to output the results as images."),
         image_format:str = "png",
         image_threshold:float = 0.005,
@@ -146,11 +147,11 @@ class Terrier(Corgi):
                             continue
 
                         accession = row['accession'].item()
-                        original_classification = row["original_classification"].item()
+                        original_classification = row["original_classification"].item().strip()
                         prediction = row["greedy_prediction"].item()
                         
-                        new_id = f"{accession}#{prediction}"
-                        record.id = new_id
+                        if not unknown_only or original_classification.lower() == "unknown":
+                            record.id = f"{accession}#{prediction}"
                         
                         # Adapt description
                         record.description = record.description.replace(original_id, "")
@@ -164,7 +165,15 @@ class Terrier(Corgi):
                             new_probability = row[prediction].values[0]
                         else:
                             new_probability = 1.0 # i.e.root
-                        record.description = f"{record.description} original classification = {original_classification}, classification probability = {new_probability:.2f} )"
+
+                        new_description = f"{record.description} original classification = {original_classification}, "
+
+                        if unknown_only:
+                            new_description += f"terrier classification = {prediction}, "
+                        
+                        new_description += f"classification probability = {new_probability:.2f} )"
+                        
+                        record.description = new_description
 
                         SeqIO.write(record, fasta_out, "fasta")
 
