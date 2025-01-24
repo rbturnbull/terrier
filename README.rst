@@ -29,7 +29,7 @@ Terrier is a Neural Network model to classify repeat sequences.
 
 It is based on ‘corgi’ which was trained to do hierarchical taxonomic classification of DNA sequences.
 
-This model was fine-tuned using the Repbase library of repetitive DNA elements and trained to do hierarchical classification according to the RepeatMasker schema.
+This model was trained using the Repbase library of repetitive DNA elements and trained to do hierarchical classification according to the RepeatMasker schema.
 
 Installation
 ==================================
