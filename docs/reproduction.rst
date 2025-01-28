@@ -10,7 +10,7 @@ This document describes how to reproduce the results of the paper. The test data
      Accessed at: `https://www.biorxiv.org/content/early/2023/10/16/2023.10.13.562246 <https://www.biorxiv.org/content/early/2023/10/16/2023.10.13.562246>`_
 
 
-Fruit-fly genome
+Fruit Fly Genome
 ================
 
 Bickmann et al. (2023) provide Transposable Elements (TE) models of a fruit-fly genome. Download it with the following command:
@@ -40,20 +40,18 @@ Now evaluate the results with the following command:
 
    terrier-tools evaluate --csv drosophila-terrier.final.TEs.csv  \
         --threshold 0.7 \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC 
+        --map I-Jockey=Jockey-I,/I=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC 
         
 That will produce the following output:
 
-.. code-block:: text
-
-    Total: 667
-    Total with ground truth: 667
-    Number classified: 428/667 (64.17%)
-    Correct predictions: 386/428 (90.19%)
-
+   Total: 667
+   Total with ground truth: 661
+   Number classified: 424/661 (64.15%)
+   Correct predictions: 386/424 (91.04%)
+   
 .. note::
 
-   The dataset includes six sequences with the 'Unknown' label. If you wish to exclude these, you can use the `--ignore Unknown` flag.
+   The dataset includes six sequences with the 'Unknown' label. That is why there is a difference between the 'Total' and 'Total with ground truth' values.
 
 To get the accuracy results just for the 'Order' level and ignoring the 'Superfamily' level, use the following command:
 
@@ -62,16 +60,16 @@ To get the accuracy results just for the 'Order' level and ignoring the 'Superfa
    terrier-tools evaluate --csv drosophila-terrier.final.TEs.csv  \
         --threshold 0.7 \
         --no-superfamily \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map I-Jockey=Jockey-I,/I=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
 .. code-block:: text
 
-    Total: 667
-    Total with ground truth: 667
-    Number classified: 544/667 (81.56%)
-    Correct predictions: 474/544 (87.13%)
+   Total: 667
+   Total with ground truth: 661
+   Number classified: 539/661 (81.54%)
+   Correct predictions: 474/539 (87.94%)
 
 To generate a confusion matrix, use the following command:
 
@@ -80,7 +78,7 @@ To generate a confusion matrix, use the following command:
    terrier-tools confusion-matrix --csv drosophila-terrier.final.TEs.csv  \
         --output drosophila-terrier-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map I-Jockey=Jockey-I,/I=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -97,7 +95,7 @@ To see the effect of the threshold on the results, you can run the following com
 
    terrier-tools threshold-plot --csv drosophila-terrier.final.TEs.csv  \
         --output drosophila-terrier-threshold-plot.html \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map I-Jockey=Jockey-I,/I=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -105,7 +103,7 @@ That will generate an HTML file like this:
     :file: ./images/drosophila-terrier-threshold-plot.html
 
 
-Rice genome
+Rice Genome
 ================
 
 Bickmann et al. (2023) also provide Transposable Elements (TE) models of a rice genome. Download it with the following command:
@@ -131,7 +129,7 @@ Now evaluate the results with the following command:
 
    terrier-tools evaluate --csv oryza-terrier.final.TEs.csv  \
         --threshold 0.7 \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map I-Jockey=Jockey-I,/I=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
@@ -149,7 +147,7 @@ To get the accuracy results just for the 'Order' level and ignoring the 'Superfa
    terrier-tools evaluate --csv oryza-terrier.final.TEs.csv  \
         --threshold 0.7 \
         --no-superfamily \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map I-Jockey=Jockey-I,/I=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
@@ -167,7 +165,7 @@ To generate a confusion matrix, use the following command:
    terrier-tools confusion-matrix --csv oryza-terrier.final.TEs.csv  \
         --output oryza-terrier-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map I-Jockey=Jockey-I,/I=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -184,7 +182,7 @@ To see the effect of the threshold on the results, you can run the following com
 
    terrier-tools threshold-plot --csv oryza-terrier.final.TEs.csv  \
         --output oryza-terrier-threshold-plot.html \
-        --map I-Jockey=I,Jockey-I=I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map I-Jockey=Jockey-I,/I=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 

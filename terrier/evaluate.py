@@ -194,6 +194,7 @@ def confusion_matrix_fig(confusion_matrix:pd.DataFrame, width:int=DEFAULT_WIDTH,
     fig.update_xaxes(side="top")
     fig.update_xaxes(title="Predicted")
     fig.update_yaxes(title="Ground Truth")
+    
     fig.update_layout(
         autosize=False,
         title={
