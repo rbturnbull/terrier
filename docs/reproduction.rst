@@ -40,7 +40,7 @@ Now evaluate the results with the following command:
 
    terrier-tools evaluate --csv drosophila-terrier.final.TEs.csv  \
         --threshold 0.7 \
-        --map /I-Jockey=I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC 
+        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC 
         
 That will produce the following output:
 
@@ -60,7 +60,7 @@ To get the accuracy results just for the 'Order' level and ignoring the 'Superfa
    terrier-tools evaluate --csv drosophila-terrier.final.TEs.csv  \
         --threshold 0.7 \
         --no-superfamily \
-        --map /I-Jockey=I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
@@ -78,7 +78,7 @@ To generate a confusion matrix, use the following command:
    terrier-tools confusion-matrix --csv drosophila-terrier.final.TEs.csv  \
         --output drosophila-terrier-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
-        --map /I-Jockey=I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -95,7 +95,7 @@ To see the effect of the threshold on the results, you can run the following com
 
    terrier-tools threshold-plot --csv drosophila-terrier.final.TEs.csv  \
         --output drosophila-terrier-threshold-plot.html \
-        --map /I-Jockey=I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -129,7 +129,7 @@ Now evaluate the results with the following command:
 
    terrier-tools evaluate --csv oryza-terrier.final.TEs.csv  \
         --threshold 0.7 \
-        --map /I-Jockey=I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
@@ -147,7 +147,7 @@ To get the accuracy results just for the 'Order' level and ignoring the 'Superfa
    terrier-tools evaluate --csv oryza-terrier.final.TEs.csv  \
         --threshold 0.7 \
         --no-superfamily \
-        --map /I-Jockey=I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
@@ -165,7 +165,7 @@ To generate a confusion matrix, use the following command:
    terrier-tools confusion-matrix --csv oryza-terrier.final.TEs.csv  \
         --output oryza-terrier-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
-        --map /I-Jockey=I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -182,7 +182,7 @@ To see the effect of the threshold on the results, you can run the following com
 
    terrier-tools threshold-plot --csv oryza-terrier.final.TEs.csv  \
         --output oryza-terrier-threshold-plot.html \
-        --map /I-Jockey=I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
