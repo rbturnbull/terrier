@@ -17,8 +17,8 @@ software_mapping_threshold = [
     ("TERL", "/Pao=/Bel-Pao,DNA=TIR,CMC-Transib=CACTA,CMC-EnSpm=CACTA,TcMar-Tc1=Tc1-Mariner,hAT-hobo=hAT,TcMar-Pogo=Tc1-Mariner,hAT-Tip100=hAT", None),
     ("TEclass2", "I-Jockey=Jockey,/I=Jockey,TcMar-Tc1=TcMar,CMC-Transib=Transib,hAT-hobo=hAT,TcMar-Pogo=TcMar,hAT-Tip100=hAT,CMC-EnSpm=CACTA,/L1=/L1_L2", 0.7),
     ("TEclass2", "I-Jockey=Jockey,/I=Jockey,TcMar-Tc1=TcMar,CMC-Transib=Transib,hAT-hobo=hAT,TcMar-Pogo=TcMar,hAT-Tip100=hAT,CMC-EnSpm=CACTA,/L1=/L1_L2", 0.9),
-    ("Terrier", "I-Jockey=Jockey-I,/I=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC", 0.7),
-    ("Terrier", "I-Jockey=Jockey-I,/I=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC", 0.9),
+    ("Terrier", "/I-Jockey=I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC", 0.7),
+    ("Terrier", "/I-Jockey=I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC", 0.9),
 ]
 data = []
 base_dir = Path(__file__).parent

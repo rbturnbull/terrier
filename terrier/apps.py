@@ -55,7 +55,13 @@ class Terrier(Corgi):
         def node_lineage_string(node) -> str:
             if node.is_root:
                 return "Unknown"
-            return "/".join([str(n) for n in node.ancestors[1:]] + [str(node)])
+            node_string = "/".join([str(n) for n in node.ancestors[1:]] + [str(node)])
+
+            # An earlier version of Terrier converted all LINE/I to LINE/Jockey-I
+            if node_string == "LINE/Jockey-I":
+                return "LINE/I"
+
+            return node_string
 
         classification_probabilities = inference.node_probabilities(results[0], root=self.classification_tree)
         category_names = [node_lineage_string(node) for node in self.classification_tree.node_list if not node.is_root]
