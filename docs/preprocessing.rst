@@ -13,9 +13,9 @@ Repbase is available with a subscription from the Genetic Information Research I
 Terrier was trained using the 29.07 release of Repbase (2024-07-24) release.
 
 Download Repbase database in FASTA format from https://www.girinst.org/server/RepBase/index.php
-Untar the file and you will have a directory with a few dozen FASTA files with a `.ref` extension. 
-We will refer to this directory as `REPBASE_DIR`. 
-We will ignore the files in the `archive` directory.
+Untar the file and you will have a directory with a few dozen FASTA files with a ``.ref`` extension. 
+We will refer to this directory as ``REPBASE_DIR``. 
+We will ignore the files in the ``archive`` directory.
 
 Preprocess
 ----------
@@ -24,7 +24,7 @@ Terrier takes two input files, a SeqTree and a SeqBank.
 The SeqBank holds the sequence data for each accession in the dataset. 
 The SeqTree has the information about the cross-validation partition for each accession and which node in the taxonomic tree that the accession corresponds to.
 
-These two files can be generated from the Repbase database using the `terrier-tools` CLI utility:
+These two files can be generated from the Repbase database using the ``terrier-tools`` CLI utility:
 
 .. code-block:: bash
 
@@ -34,7 +34,7 @@ This will create a SeqBank file called ``Repbase-seqbank.sb`` and a SeqTree file
 
 The SeqTree file will have five cross-validation partitions and a taxonomic tree using the RepeatMasker schema.
 
-To create a different number of partitions, run the command with the `--partitions` flag. For more options see the help:
+To create a different number of partitions, run the command with the ``--partitions`` flag. For more options see the help:
 
 .. code-block:: bash
 
@@ -73,7 +73,7 @@ That will output a tree with the number of accessions like this:
     │   ├── L1 (4833)
     │   ├── R2 (336)
     │   ├── CR1 (1237)
-    │   ├── Jockey-I (1093)
+    │   ├── I (1093)
     │   ├── R1 (410)
     │   ├── Rex-Babar (141)
     │   ├── Dong-R4 (58)

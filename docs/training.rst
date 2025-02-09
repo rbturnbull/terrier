@@ -15,14 +15,30 @@ To use the same hyperparameters as in the main release of Terrier, you can run t
     SEQTREE=$REPBASE_DIR/Repbase-seqtree.st
     terrier-tools train \
         --seqtree $SEQTREE \
-        --seqbank $SEQBANK \
-        --max-learning-rate 0.001 \
-        --macc 10000000000 \
-        --max-epochs 130 \
-        --output-dir outputs/ 
+        --seqbank $SEQBANK
 
-You can see the command-line options by running:
+You can see other command-line options by running:
 
 .. code-block:: bash
 
     terrier-tools train --help
+
+To reproduce the training process of the main release of Terrier, you can use the following command:
+
+.. code-block:: bash
+
+    terrier-tools train         \
+        --seqtree $SEQTREE         \
+        --seqbank $SEQBANK         \
+        --max-learning-rate 0.001         \
+        --macc 20000000000         \
+        --cnn-layers 4 \
+        --dropout 0.2479560973202271 \
+        --embedding-dim 18 \
+        --factor 1.959254226973812 \
+        --kernel-size 7 \
+        --penultimate-dims 1953 \
+        --phi 1.0196823166741456 \
+        --max-epochs 100 \
+        --test-partition -2 \
+        --validation-partition -1

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "Terrier"
-version = "0.2.0"
-description = "Classifier of Repeats"
+version = "0.3.0"
+description = "Transposable Element Repeat Result classifIER"
 authors = ["Robert Turnbull <robert.turnbull@unimelb.edu.au>"]
 license = "Apache-2.0"
 readme = "README.rst"
@@ -26,7 +26,7 @@ bio-corgi = {git = "https://github.com/rbturnbull/corgi.git", branch="lightning"
 pyfastx = "^1.1.0"
 toml = "^0.10.2"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = ">=6.2.5"
 ipykernel = ">=6.6.1"
 coverage = ">=5.5"

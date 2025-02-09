@@ -1,4 +1,6 @@
+from pathlib import Path
 import pandas as pd
+from plotly.subplots import make_subplots
 from sklearn.metrics import confusion_matrix as sklearn_confusion_matrix
 import plotly.graph_objects as go
 import plotly.express as px
@@ -194,6 +196,7 @@ def confusion_matrix_fig(confusion_matrix:pd.DataFrame, width:int=DEFAULT_WIDTH,
     fig.update_xaxes(side="top")
     fig.update_xaxes(title="Predicted")
     fig.update_yaxes(title="Ground Truth")
+    
     fig.update_layout(
         autosize=False,
         title={
@@ -211,3 +214,101 @@ def confusion_matrix_fig(confusion_matrix:pd.DataFrame, width:int=DEFAULT_WIDTH,
     return fig
 
 
+def comparison_plot(files: list[Path], superfamily:bool=False, threshold:float=0.0):
+    def read_csv(csv_file: Path):
+        df = pd.read_csv(csv_file)
+        df["original_classification"] = df["original_classification"].str.replace("?","")
+        return df
+
+    height = 400+300*len(files)
+    fig = make_subplots(
+        rows=len(files), cols=2, 
+        shared_yaxes=True, shared_xaxes=True, 
+        horizontal_spacing=0.03,
+        vertical_spacing=20 / height, 
+        subplot_titles=("Original classification", "Terrier"),
+    )
+
+    categories = set()
+    for index, csv_file in enumerate(files):
+        df = read_csv(csv_file)
+
+        if threshold > 0.0:
+            indexes = df["probability"] > threshold
+            df.loc[ indexes, "prediction" ] = "Unknown"
+
+        if not superfamily:
+            df["original_classification"] = df["original_classification"].str.split("/").str[0]
+            df["prediction"] = df["prediction"].str.split("/").str[0]
+
+        categories |= set(df["original_classification"].unique()) | set(df["prediction"].unique())
+
+    categories = sorted(categories, key=lambda x: x.lower())
+
+    for index, csv_file in enumerate(files):
+        df = read_csv(csv_file)
+
+        if threshold > 0.0:
+            indexes = df["probability"] > threshold
+            df.loc[ indexes, "prediction" ] = "Unknown"
+
+        if not superfamily:
+            df["original_classification"] = df["original_classification"].str.split("/").str[0]
+            df["prediction"] = df["prediction"].str.split("/").str[0]
+
+        original_classified = df.loc[df["original_classification"] != "Unknown", "original_classification"].value_counts()
+        original_classified = [original_classified[k] if k in original_classified else 0 for k in categories]
+
+        original_unclassified = df.loc[df["original_classification"] == "Unknown", "original_classification"].value_counts()
+        original_unclassified = [original_unclassified[k] if k in original_unclassified else 0 for k in categories]
+
+        # agreement = df.loc[(df["prediction"] == df["original_classification"]), "prediction"].value_counts()
+        # disagreement = df.loc[(df["prediction"] != df["original_classification"]) & (df["original_classification"] != "Unknown"), "prediction"].value_counts()
+        # unknown = df.loc[(df["prediction"] != df["original_classification"]) & (df["original_classification"] == "Unknown"), "prediction"].value_counts()
+
+        agreement = df.loc[(df["prediction"] == df["original_classification"]) & (df["original_classification"] != "Unknown"), "prediction"].value_counts()
+        disagreement = df.loc[(df["prediction"] != df["original_classification"]) & (df["original_classification"] != "Unknown"), "prediction"].value_counts()
+        unknown = df.loc[(df["original_classification"] == "Unknown"), "prediction"].value_counts()
+
+        agreement = [agreement[k] if k in agreement else 0 for k in categories]
+        disagreement = [disagreement[k] if k in disagreement else 0 for k in categories]
+        unknown = [unknown[k] if k in unknown else 0 for k in categories]
+
+        fig.add_trace(go.Bar(x=categories, y=disagreement, name="Terrier Disagree", showlegend=index==0, marker_color="red"), row=1+index, col=2)
+        fig.add_trace(go.Bar(x=categories, y=agreement, name="Terrier Agree", showlegend=index==0, marker_color="blue"), row=1+index, col=2)
+
+        fig.add_trace(go.Bar(x=categories, y=original_unclassified, name="Original Unclassified", showlegend=index==0, marker_color="grey"), row=1+index, col=1)
+        fig.add_trace(go.Bar(x=categories, y=original_classified, name="Original Classified", showlegend=index==0, marker_color="orange"), row=1+index, col=1)
+
+        fig.add_trace(go.Bar(x=categories, y=unknown, name="Original Unclassified", showlegend=False, marker_color="grey"), row=1+index, col=2)
+
+        filename = csv_file.stem.replace("-families-terrier", "")
+        filename = filename.replace("_", " ")
+        filename = filename[0].upper() + filename[1:]
+
+
+        fig.update_layout(**{f"yaxis{1+index*2}_title": f"{filename}"})
+
+    # stack barmode
+    fig.update_layout(barmode='stack')
+
+    # legend horizontal and on top
+    legend_height_px = 30
+    legend_y_position = 1 + (legend_height_px / height)
+
+    fig.update_layout(
+        margin=dict(t=legend_height_px + 20),  # Ensure space for the legend
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=legend_y_position,
+            xanchor="right",
+            x=1
+        )
+    )
+
+    format_fig(fig)
+    fig.update_layout(height=height, width=1000)
+    fig.update_layout(margin=dict(l=0, r=0, t=20, b=20))    
+
+    return fig
