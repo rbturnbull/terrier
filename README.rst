@@ -2,7 +2,7 @@
 
 .. start-badges
 
-|testing badge| |coverage badge| |docs badge| |black badge| |torchapp badge|
+|testing badge| |docs badge| |black badge| |torchapp badge|
 
 .. |testing badge| image:: https://github.com/rbturnbull/terrier/actions/workflows/testing.yml/badge.svg
     :target: https://github.com/rbturnbull/terrier/actions
