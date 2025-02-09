@@ -329,7 +329,8 @@ class Terrier(Corgi):
         superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
         show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
         threshold:float=None,
-    ) -> pd.DataFrame:
+    ):
+        """ Plot the comparison of Terrier results with the original annotations. """
         
         fig = comparison_plot(csv, superfamily=superfamily, threshold=threshold)
         
