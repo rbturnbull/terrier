@@ -13,7 +13,7 @@ from rich.console import Console
 console = Console()
 
 from .repeatmasker import create_repeatmasker_seqtree
-from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig, evaluate_results, DEFAULT_HEIGHT, DEFAULT_WIDTH
+from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig, evaluate_results, DEFAULT_HEIGHT, DEFAULT_WIDTH, comparison_plot
 
 
 class Terrier(Corgi):
@@ -319,3 +319,31 @@ class Terrier(Corgi):
                     fig.write_image(str(output), engine="kaleido")
         
         return cm
+
+
+    @ta.tool
+    def comparison_plot(
+        self, 
+        csv:list[Path] = ta.Param(..., help="The CSV file(s) with the results."),
+        output:Path=ta.Param(default=None, help="A path to write the comparison plots, can be HTML or an image file."),
+        superfamily:bool=ta.Param(default=True, help="Whether to use the superfamily level for the confusion matrix."),
+        show:bool=ta.Param(default=True, help="Whether to show the confusion matrix."),
+        threshold:float=None,
+    ) -> pd.DataFrame:
+        
+        fig = comparison_plot(csv, superfamily=superfamily, threshold=threshold)
+        
+        if show:
+            fig.show()
+
+        if output:
+            output = Path(output)
+            output.parent.mkdir(exist_ok=True, parents=True)
+            print(f"Writing comparison plot to: {output}")
+            match output.suffix.lower():
+                case ".html":
+                    fig.write_html(str(output))
+                case _:
+                    fig.write_image(str(output), engine="kaleido")
+        
+        return fig
