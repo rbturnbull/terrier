@@ -25,7 +25,7 @@
 
 Transposable Element Repeat Result classifIER
 
-Terrier is a Neural Network model to classify repeat sequences.
+Terrier is a Neural Network model to classify transposable element sequences.
 
 It is based on ‘corgi’ which was trained to do hierarchical taxonomic classification of DNA sequences.
 
