@@ -66,7 +66,7 @@ class Terrier(Corgi):
         classification_probabilities = inference.node_probabilities(results[0], root=self.classification_tree)
         category_names = [node_lineage_string(node) for node in self.classification_tree.node_list if not node.is_root]
 
-        chunk_details = pd.DataFrame(self.dataloader.chunk_details, columns=["file", "original_id", "chunk"])
+        chunk_details = pd.DataFrame(self.dataloader.chunk_details, columns=["file", "original_id", "description", "chunk"])
         predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=category_names)
 
         results_df = pd.concat(
@@ -76,7 +76,7 @@ class Terrier(Corgi):
 
         # Average over chunks
         results_df["order"] = results_df.index
-        results_df = results_df.groupby(["file", "original_id"]).mean().reset_index()
+        results_df = results_df.groupby(["file", "original_id", "description"]).mean().reset_index()
 
         # sort to get original order
         results_df = results_df.sort_values(by="order").drop(columns=["order"])
@@ -113,7 +113,7 @@ class Terrier(Corgi):
         results_df['original_classification'] = results_df['original_id'].apply(get_original_classification)
 
         # Reorder columns
-        results_df = results_df[["file", "accession", "prediction", "probability", "original_id", "original_classification" ] + category_names]
+        results_df = results_df[["file", "accession", "prediction", "probability", "original_id", "original_classification", "description" ] + category_names]
 
         # Output images
         if image_dir:
