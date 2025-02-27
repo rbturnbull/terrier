@@ -54,14 +54,13 @@ That will add the classification to after the sequence ID in the `OUTPUT.fa` FAS
 
 If you want to save the probabilities for all classes run this:
 
-
 .. code-block:: bash
 
     terrier --file INPUT.fa --output-csv OUTPUT.csv
 
-The columns will be the probability of each classification and the rows correspond to each sequence in INPUT.fa.
+The columns will be the probability of each classification and the rows correspond to each sequence in ``INPUT.fa``.
 
-If you want to output a visualisation of the prediction probabilities:
+If you want to output a visualization of the prediction probabilities:
 
 .. code-block:: bash
 
@@ -73,12 +72,23 @@ The outputs for the above can be combined together. For more options run
 
     terrier --help
 
-
 To see the options to train the model, run:
 
 .. code-block:: bash
 
     terrier-tools --help
+
+Programmatic Usage
+==================================
+
+You can also use the model programmatically:
+
+.. code-block:: python
+
+    from terrier import Terrier
+
+    terrier = Terrier()
+    terrier(file="INPUT.fa", output_fasta="OUTPUT.fa")
 
 .. end-quickstart
 

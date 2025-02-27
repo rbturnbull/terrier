@@ -152,7 +152,6 @@ class Terrier(Corgi):
 
                         accession = row['accession'].item()
                         original_classification = row["original_classification"].item().strip()
-                        prediction = row["greedy_prediction"].item()
                         prediction = row["prediction"].item()
                         
                         if not unknown_only or original_classification.lower() == "unknown":
