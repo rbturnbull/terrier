@@ -1352,23 +1352,6 @@ test-full = ["adlfs", "aiohttp (!=4.0.0a0,!=4.0.0a1)", "cloudpickle", "dask", "d
 tqdm = ["tqdm"]
 
 [[package]]
-name = "future-typing"
-version = "0.4.1"
-description = "Use generic type hints and new union syntax `|` with python 3.6+"
-optional = false
-python-versions = ">=3.6"
-groups = ["main"]
-markers = "python_version <= \"3.11\""
-files = [
-    {file = "future_typing-0.4.1-py3-none-any.whl", hash = "sha256:af19e06b7fe6fdfb8d83c265a2688cba9ac74b0a6a2dac14c268910ecd14ac8d"},
-    {file = "future_typing-0.4.1.tar.gz", hash = "sha256:65fdc5034a95db212790fee5e977fb0a2df8deb60dccf3bac17d6d2b1a9bbacd"},
-]
-
-[package.extras]
-dev = ["pre-commit (==2.12.1)"]
-test = ["black (==21.5b1)", "flake8 (==3.9.2)", "isort (==5.8.0)", "mypy (==0.812)", "pytest (==6.2.4)", "pytest-cov (==2.11.1)", "typing-extensions (==3.10.0.0)"]
-
-[[package]]
 name = "gitdb"
 version = "4.0.11"
 description = "Git Object Database"
@@ -3217,7 +3200,7 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "polytorch"
-version = "0.1.1"
+version = "0.1.2"
 description = "Embeddings and loss functions for different data types."
 optional = false
 python-versions = "^3.8"
@@ -3228,18 +3211,17 @@ develop = false
 
 [package.dependencies]
 attrs = ">=19"
-future-typing = "^0.4.1"
 hierarchicalsoftmax = ">=1.0.2"
 kaleido = "=0.2.1"
-plotly = "^5.15.0"
-scikit-learn = "^1.0.2"
+plotly = ">=5.15.0"
+scikit-learn = ">=1.0.2"
 torch = ">=1.10.2"
 
 [package.source]
 type = "git"
 url = "https://github.com/rbturnbull/polytorch.git"
 reference = "hierarchical"
-resolved_reference = "8218f6a1dc6e66e409314fd3459da192e739f10a"
+resolved_reference = "b6185a92c13b5b71d90d7996f9e21fb2363e9e31"
 
 [[package]]
 name = "pre-commit"
