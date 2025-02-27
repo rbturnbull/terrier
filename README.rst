@@ -2,7 +2,7 @@
 
 .. start-badges
 
-|testing badge| |docs badge| |black badge| |torchapp badge|
+|colab badge| |testing badge| |docs badge| |black badge| |torchapp badge|
 
 .. |testing badge| image:: https://github.com/rbturnbull/terrier/actions/workflows/testing.yml/badge.svg
     :target: https://github.com/rbturnbull/terrier/actions
@@ -18,6 +18,10 @@
 
 .. |torchapp badge| image:: https://img.shields.io/badge/MLOpps-torchapp-B1230A.svg
     :target: https://rbturnbull.github.io/torchapp/
+
+.. |colab badge| image:: https://colab.research.google.com/assets/colab-badge.svg
+   :target: https://colab.research.google.com/github/rbturnbull/terrier/blob/main/terrier_colab.ipynb
+
     
 .. end-badges
 
@@ -40,6 +44,14 @@ Install using pip:
 
     pip install git+https://github.com/rbturnbull/terrier.git
 
+
+Google Colab Version
+==================================
+
+Follow this link to launch a Google Colab notebook where you can run the model on your own data: |colab badge2|
+
+.. |colab badge2| image:: https://colab.research.google.com/assets/colab-badge.svg
+   :target: https://colab.research.google.com/github/rbturnbull/terrier/blob/main/terrier_colab.ipynb
 
 Usage
 ==================================
