@@ -7,7 +7,7 @@ from pathlib import Path
 def write_fig(fig, path:str|Path):
     path = str(path)
     fig.write_image(path+".png")
-    fig.write_image(path+".svg")
+    fig.write_image(path+".pdf")
     fig.write_html(path+".html")
 
 
@@ -64,11 +64,12 @@ results.to_csv(base_dir/"comparison-results.csv")
 for rank in ["Order", "Superfamily"]:
     fig = go.Figure()
     fig = make_subplots(rows=1, cols=2, subplot_titles=("a. Rice", "b. Fruit Fly"), shared_yaxes=True, horizontal_spacing=0.03)
+    software_labels = [label.replace(" ","<br>") for label in results["Software"]]
     fig.add_trace(
         go.Scatter(
             x=results[f"Rice {rank} Proportion Classified"],
             y=results[f"Rice {rank} Accuracy"],
-            text = results["Software"],
+            text = software_labels,
             name=rank,
             showlegend=False,
             mode='markers+text',
@@ -83,7 +84,7 @@ for rank in ["Order", "Superfamily"]:
         go.Scatter(
             x=results[f"Fruit Fly {rank} Proportion Classified"],
             y=results[f"Fruit Fly {rank} Accuracy"],
-            text = results["Software"],
+            text = software_labels,
             name=rank,
             showlegend=False,
             mode='markers+text',
@@ -110,7 +111,7 @@ for rank in ["Order", "Superfamily"]:
         height=700,
     )
     fig.update_layout(margin=dict(l=0, r=0, t=20, b=10))
-    write_fig(fig, base_dir/f"{rank}-Proportion-Classified-vs-Accuracy")
+    write_fig(fig, base_dir/f"{rank}-Proportion-Accuracy-vs-Classified")
 
 results.iloc[:, 1:] = results.iloc[:, 1:] * 100  # Multiply numeric columns by 100
 results.iloc[:, 1:] = results.iloc[:, 1:].round(1).astype(str) + '\%'  # Format as percentage strings
