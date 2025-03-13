@@ -120,6 +120,25 @@ Terrier was developed by:
 
 For more information contact: <robert.turnbull@unimelb.edu.au>
 
+If you use this software, please cite the following preprint:
+
+    Robert Turnbull, Neil D. Young, Edoardo Tescari, Lee F. Skerratt, and Tiffany A. Kosch. (2025). 'Terrier: A Deep Learning Repeat Classifier'. `arXiv:2503.09312 <https://arxiv.org/abs/2503.09312>`_.
+
+Here it is in BibTeX format:
+
+.. code-block:: bibtex
+
+    @article{terrier,
+        title = {{Terrier: A Deep Learning Repeat Classifier}},
+        author = {Turnbull, Robert and Young, Neil D. and Tescari, Edoardo and Skerratt, Lee F. and Kosch, Tiffany A.},
+        year = {2025},
+        journal = {arXiv},
+        url = {https://arxiv.org/abs/2503.09312},
+        doi = {10.48550/arXiv.2503.09312}
+    }
+
+This will be updated with the final publication details when available.
+
 Created using torchapp (https://github.com/rbturnbull/torchapp).
 
 .. end-credits
