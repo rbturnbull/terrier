@@ -110,7 +110,13 @@ Credits
 
 .. start-credits
 
-Robert Turnbull and colleagues at the University of Melbourne
+Terrier was developed by:
+
+- `Robert Turnbull <https://robturnbull.com>`_
+- `Neil D. Young <https://findanexpert.unimelb.edu.au/profile/249669-neil-young>`_
+- `Edoardo Tescari <https://findanexpert.unimelb.edu.au/profile/428364-edoardo-tescari>`_
+- `Lee F. Skerratt <https://findanexpert.unimelb.edu.au/profile/451921-lee-skerratt>`_
+- `Tiffany A. Kosch <https://findanexpert.unimelb.edu.au/profile/775927-tiffany-kosch>`_
 
 For more information contact: <robert.turnbull@unimelb.edu.au>
 
