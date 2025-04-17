@@ -30,8 +30,10 @@ jobs:
           cache: 'poetry'
 
       - name: Install Poetry
-        run: pipx install poetry
-
+        run: |
+          pipx install poetry
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        
       - name: Cache Poetry packages
         uses: actions/cache@v3
         with:
