@@ -2,19 +2,14 @@ name: docs
 
 on:
   push:
-    branches: main
-
-  # Allows you to run this workflow manually from the Actions tab
+    branches: [main]
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -25,37 +20,35 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10"]
     steps:
       - uses: actions/checkout@v3
-      - name: Install poetry
-        run: pipx install poetry
-      - name: Install dependencies for Python ${{ matrix.python-version }}
+
+      - name: Set up Python 3.11
         uses: actions/setup-python@v3
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
           cache: 'poetry'
 
-      - name: Cache Poetry virtualenvs
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Cache Poetry packages
         uses: actions/cache@v3
         with:
           path: ~/.cache/pypoetry
-          key: ${{ runner.os }}-poetry-${{ matrix.python-version }}
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-poetry-
-        
-      - run: |
-          poetry env use "${{ matrix.python-version }}"
-          poetry install
-          
-      - name: Docs
-        run: |
-          poetry run sphinx-build -b html docs gh-pages
 
-      - name: Coverage
+      - name: Install dependencies
+        run: |
+          poetry env use "3.11"
+          poetry install
+
+      - name: Build Sphinx docs
+        run: poetry run sphinx-build -b html docs gh-pages
+
+      - name: Run tests and generate coverage report
         run: |
           poetry run coverage run -m pytest
           echo "COVERAGE=$(poetry run coverage report --precision 2 | grep TOTAL | tr -s ' ' | cut -f 4 -d " ")" >> $GITHUB_ENV
@@ -71,7 +64,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4    
+        uses: actions/deploy-pages@v4
 
       - name: Create Coverage Badge
         uses: schneegans/dynamic-badges-action@v1.1.0
