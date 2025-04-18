@@ -46,8 +46,8 @@ jobs:
         poetry env use "${{ matrix.python-version }}"
         poetry install
 
-        - name: Build Sphinx docs
-        run: poetry run sphinx-build -b html docs gh-pages
+    - name: Build Sphinx docs
+      run: poetry run sphinx-build -b html docs gh-pages
 
     - name: Run tests and generate coverage report
       run: |
