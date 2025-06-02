@@ -4,9 +4,9 @@
 
 |pypi badge| |colab badge| |testing badge| |docs badge| |black badge| |torchapp badge|
 
-.. |pypi badge| image:: https://img.shields.io/pypi/v/terrier?color=blue
+.. |pypi badge| image:: https://img.shields.io/pypi/v/bio-terrier?color=blue
    :alt: PyPI - Version
-   :target: https://pypi.org/project/terrier/
+   :target: https://pypi.org/project/bio-terrier/
 
 .. |testing badge| image:: https://github.com/rbturnbull/terrier/actions/workflows/testing.yml/badge.svg
     :target: https://github.com/rbturnbull/terrier/actions
