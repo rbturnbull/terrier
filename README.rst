@@ -2,7 +2,11 @@
 
 .. start-badges
 
-|colab badge| |testing badge| |docs badge| |black badge| |torchapp badge|
+|pypi badge| |colab badge| |testing badge| |docs badge| |black badge| |torchapp badge|
+
+.. |pypi badge| image:: https://img.shields.io/pypi/v/terrier?color=blue
+   :alt: PyPI - Version
+   :target: https://pypi.org/project/terrier/
 
 .. |testing badge| image:: https://github.com/rbturnbull/terrier/actions/workflows/testing.yml/badge.svg
     :target: https://github.com/rbturnbull/terrier/actions
@@ -16,7 +20,7 @@
 .. |coverage badge| image:: https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rbturnbull/5e0c3115955fde132a8b7c131da68b86/raw/coverage-badge.json
     :target: https://rbturnbull.github.io/terrier/coverage/
 
-.. |torchapp badge| image:: https://img.shields.io/badge/MLOpps-torchapp-B1230A.svg
+.. |torchapp badge| image:: https://img.shields.io/badge/torch-app-B1230A.svg
     :target: https://rbturnbull.github.io/torchapp/
 
 .. |colab badge| image:: https://colab.research.google.com/assets/colab-badge.svg
