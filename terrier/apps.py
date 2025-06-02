@@ -24,6 +24,11 @@ class Terrier(Corgi):
     def data(self, **kwargs):
         data = super().data(**kwargs)
         return data
+    
+    def get_bibtex_files(self) -> list[Path]:
+        files = super().get_bibtex_files()
+        files.append(Path(__file__).parent / "terrier.bib")
+        return files
 
     @ta.method    
     def metrics(self) -> list[tuple[str,Metric]]:
