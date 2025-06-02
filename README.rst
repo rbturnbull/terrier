@@ -46,6 +46,16 @@ Install using pip:
 
 .. code-block:: bash
 
+    pip install bio-terrier
+
+.. warning ::
+
+    Do not try just ``pip install terrier`` because that is a different package.
+
+Or install the latest version from GitHub:
+
+.. code-block:: bash
+
     pip install git+https://github.com/rbturnbull/terrier.git
 
 
@@ -122,11 +132,15 @@ Terrier was developed by:
 - `Lee F. Skerratt <https://findanexpert.unimelb.edu.au/profile/451921-lee-skerratt>`_
 - `Tiffany A. Kosch <https://findanexpert.unimelb.edu.au/profile/775927-tiffany-kosch>`_
 
-For more information contact: <robert.turnbull@unimelb.edu.au>
-
 If you use this software, please cite the following preprint:
 
     Robert Turnbull, Neil D. Young, Edoardo Tescari, Lee F. Skerratt, and Tiffany A. Kosch. (2025). 'Terrier: A Deep Learning Repeat Classifier'. `arXiv:2503.09312 <https://arxiv.org/abs/2503.09312>`_.
+
+This command will generate a bibliography for the Terrier project.
+
+.. code-block:: bash
+
+    terrier --bibliography
 
 Here it is in BibTeX format:
 
@@ -141,7 +155,16 @@ Here it is in BibTeX format:
         doi = {10.48550/arXiv.2503.09312}
     }
 
+Run the following command to get the latest BibTeX entry:
+
+.. code-block:: bash
+
+    terrier --bibtex
+
+
 This will be updated with the final publication details when available.
+
+
 
 Created using torchapp (https://github.com/rbturnbull/torchapp).
 
