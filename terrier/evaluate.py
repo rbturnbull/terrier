@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+import re
 from plotly.subplots import make_subplots
 from sklearn.metrics import confusion_matrix as sklearn_confusion_matrix
 import plotly.graph_objects as go
@@ -36,7 +37,8 @@ def map_replace(string:str, map:dict[str,str]) -> str:
     Replaces values in a string using a map.
     """
     for key, value in map.items():
-        string = string.replace(key, value)
+        string = re.sub(key, value, string)
+        # string = string.replace(key, value)
     return string
 
 

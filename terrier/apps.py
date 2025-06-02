@@ -8,12 +8,49 @@ import torch
 from Bio import SeqIO
 from seqbank import SeqBank
 from corgi import Corgi
+from rich.table import Table
+from rich.box import SIMPLE
+
 
 from rich.console import Console
 console = Console()
 
 from .repeatmasker import create_repeatmasker_seqtree
 from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig, evaluate_results, DEFAULT_HEIGHT, DEFAULT_WIDTH, comparison_plot
+
+
+def output_results_bar_chart(predictions: pd.Series, top_k: int = 10, bar_size: int = 80):
+    value_counts = predictions.value_counts()
+    total_categories = len(value_counts)
+    if top_k:
+        original_value_counts = value_counts
+        value_counts = value_counts.iloc[:top_k]
+    table = Table(box=SIMPLE)
+    table.add_column("Prediction", justify="left", style="bold")
+    table.add_column("Proportion", justify="left", style="blue")
+    table.add_column("Count", justify="right")
+    for prediction, count in value_counts.items():
+        proportion = count / len(predictions)
+        bar = "█" * int(proportion * bar_size)
+        table.add_row(prediction, f"{bar} {proportion:.1%}", f"{count}")
+    if total_categories > top_k:
+        count = sum(original_value_counts.iloc[top_k:])
+        proportion = count / len(predictions)
+        bar = "█" * int(proportion * bar_size)
+        table.add_row(
+            "Other Categories",
+            f"{bar} {proportion:.1%}",
+            f"{count}"
+        )
+    # Add line
+    table.add_row('────────────────────', '─' * bar_size, '─' * 10, style="red")
+    table.add_row(
+        "Total",
+        "",
+        f"{len(predictions)}"
+    )
+
+    console.print(table)
 
 
 class Terrier(Corgi):
@@ -138,6 +175,8 @@ class Terrier(Corgi):
                 predictions=greedy_predictions,
                 threshold=image_threshold,
             )
+
+        output_results_bar_chart(results_df["prediction"], top_k=10)
 
         if not (image_dir or output_fasta or output_csv or output_tips_csv):
             print("No output files requested.")
@@ -352,3 +391,9 @@ class Terrier(Corgi):
                     fig.write_image(str(output), engine="kaleido")
         
         return fig
+
+    def package_name(self) -> str:
+        """
+        Returns the name of the package.
+        """
+        return "bio-terrier"

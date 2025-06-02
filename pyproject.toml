@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "Terrier"
+name = "bio-terrier"
 version = "0.3.0"
 description = "Transposable Element Repeat Result classifIER"
 authors = ["Robert Turnbull <robert.turnbull@unimelb.edu.au>"]
@@ -8,7 +8,7 @@ readme = "README.rst"
 repository = "https://github.com/rbturnbull/terrier/"
 documentation = "https://rbturnbull.github.io/terrier"
 homepage = "https://github.com/rbturnbull/terrier/"
-keywords = ["fastai", "torchapp", "pytorch", "deep learning", "command-line interface"]
+keywords = ["torchapp", "pytorch", "deep learning", "command-line interface"]
 # For classifiers see https://pypi.org/classifiers/
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
@@ -16,6 +16,10 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Scientific/Engineering :: Artificial Intelligence"
 ]
+packages = [
+    {include = "terrier"}
+]
+
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
