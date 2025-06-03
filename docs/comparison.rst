@@ -33,6 +33,28 @@ Rice
     :file: ../comparison-test-data/DeepTE/DeepTE-rice-confusion-matrices/DeepTE-rice-superfamily-confusion-matrix.html
 
 
+Human
+-------------
+
+.. raw:: html
+    :file: ../comparison-test-data/DeepTE/DeepTE-human-confusion-matrices/DeepTE-human-order-confusion-matrix.html
+
+
+.. raw:: html
+    :file: ../comparison-test-data/DeepTE/DeepTE-human-confusion-matrices/DeepTE-human-superfamily-confusion-matrix.html
+
+
+Mouse
+-------------
+
+.. raw:: html
+    :file: ../comparison-test-data/DeepTE/DeepTE-mouse-confusion-matrices/DeepTE-mouse-order-confusion-matrix.html
+
+
+.. raw:: html
+    :file: ../comparison-test-data/DeepTE/DeepTE-mouse-confusion-matrices/DeepTE-mouse-superfamily-confusion-matrix.html
+
+
 TERL
 =============
 
@@ -58,6 +80,29 @@ Rice
     :file: ../comparison-test-data/TERL/TERL-rice-confusion-matrices/TERL-rice-superfamily-confusion-matrix.html
 
 
+Human
+-------------
+
+.. raw:: html
+    :file: ../comparison-test-data/TERL/TERL-human-confusion-matrices/TERL-human-order-confusion-matrix.html
+
+
+.. raw:: html
+    :file: ../comparison-test-data/TERL/TERL-human-confusion-matrices/TERL-human-superfamily-confusion-matrix.html
+
+Mouse
+-------------
+
+.. raw:: html
+    :file: ../comparison-test-data/TERL/TERL-mouse-confusion-matrices/TERL-mouse-order-confusion-matrix.html
+
+
+.. raw:: html
+    :file: ../comparison-test-data/TERL/TERL-mouse-confusion-matrices/TERL-mouse-superfamily-confusion-matrix.html
+
+
+
+
 TEclass2 (threshold 0.7)
 ========================
 
@@ -81,6 +126,27 @@ Rice
 
 .. raw:: html
     :file: ../comparison-test-data/TEclass2/TEclass2-rice-confusion-matrices/TEclass2-0.7-rice-superfamily-confusion-matrix.html
+
+Human
+-------------
+
+.. raw:: html
+    :file: ../comparison-test-data/TERL/TERL-human-confusion-matrices/TERL-human-order-confusion-matrix.html
+
+
+.. raw:: html
+    :file: ../comparison-test-data/TERL/TERL-human-confusion-matrices/TERL-human-superfamily-confusion-matrix.html
+
+
+Mouse
+-------------
+
+.. raw:: html
+    :file: ../comparison-test-data/TERL/TERL-mouse-confusion-matrices/TERL-mouse-order-confusion-matrix.html
+
+
+.. raw:: html
+    :file: ../comparison-test-data/TERL/TERL-mouse-confusion-matrices/TERL-mouse-superfamily-confusion-matrix.html
 
 
 TEclass2 (threshold 0.9)
@@ -108,3 +174,24 @@ Rice
     :file: ../comparison-test-data/TEclass2/TEclass2-rice-confusion-matrices/TEclass2-0.9-rice-superfamily-confusion-matrix.html
 
 
+Human
+-------------
+
+.. raw:: html
+    :file: ../comparison-test-data/TEclass2/TEclass2-human-confusion-matrices/TEclass2-0.9-human-order-confusion-matrix.html
+
+
+.. raw:: html
+    :file: ../comparison-test-data/TEclass2/TEclass2-human-confusion-matrices/TEclass2-0.9-human-superfamily-confusion-matrix.html
+
+
+
+Mouse
+-------------
+
+.. raw:: html
+    :file: ../comparison-test-data/TEclass2/TEclass2-mouse-confusion-matrices/TEclass2-0.9-mouse-order-confusion-matrix.html
+
+
+.. raw:: html
+    :file: ../comparison-test-data/TEclass2/TEclass2-mouse-confusion-matrices/TEclass2-0.9-mouse-superfamily-confusion-matrix.html

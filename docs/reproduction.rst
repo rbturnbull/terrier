@@ -188,3 +188,83 @@ That will generate an HTML file like this:
 
 .. raw:: html
     :file: ./images/oryza-terrier-threshold-plot.html
+
+
+
+Human Genome
+================
+
+
+.. code-block:: bash
+
+   wget https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Homo_sapiens.fasta
+
+Run inference using Terrier like this:
+
+.. code-block:: bash
+
+   terrier --file Homo_sapiens.fasta --output-csv Terrier-human.csv --threshold 0
+
+
+Now evaluate the results with the following command:
+
+.. code-block:: bash
+
+   terrier-tools evaluate --csv Terrier-human.csv  \
+        --threshold 0.7 \
+        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/I,/Jockey.*=/I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
+
+
+To generate a confusion matrix, use the following command:
+
+.. code-block:: bash
+
+   terrier-tools confusion-matrix --csv Terrier-human.csv  \
+        --output Terrier-human-confusion-matrix-threshold-0.7.html \
+        --threshold 0.7 \
+        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/I,/Jockey.*=/I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
+
+That will generate an HTML file like this:
+
+.. raw:: html
+    :file: ../comparison-test-data/Terrier/Terrier-human-confusion-matrices/Terrier-0.7-human-superfamily-confusion-matrix.html
+
+
+
+Mouse Genome
+================
+
+
+.. code-block:: bash
+
+   wget https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Mus_musculus.fasta
+
+Run inference using Terrier like this:
+
+.. code-block:: bash
+
+   terrier --file Mus_musculus.fasta --output-csv Terrier-mouse.csv --threshold 0
+
+
+Now evaluate the results with the following command:
+
+.. code-block:: bash
+
+   terrier-tools evaluate --csv Terrier-mouse.csv  \
+        --threshold 0.7 \
+        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/I,/Jockey.*=/I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
+
+
+To generate a confusion matrix, use the following command:
+
+.. code-block:: bash
+
+   terrier-tools confusion-matrix --csv Terrier-mouse.csv  \
+        --output Terrier-mouse-confusion-matrix-threshold-0.7.html \
+        --threshold 0.7 \
+        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/I,/Jockey.*=/I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
+
+That will generate an HTML file like this:
+
+.. raw:: html
+    :file: ../comparison-test-data/Terrier/Terrier-mouse-confusion-matrices/Terrier-0.7-mouse-superfamily-confusion-matrix.html

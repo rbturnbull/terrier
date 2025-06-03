@@ -187,3 +187,4 @@ drosophila-terrier.final.TEs.csv
 drosophila.final.TEs.fa
 lightning_logs/
 comparison-test-data/get-rules.ipynb
+compare.sh

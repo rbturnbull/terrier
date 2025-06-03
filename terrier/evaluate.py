@@ -121,7 +121,7 @@ def evaluate_results(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", 
     
     # Map values
     actual = np.array(map_replace_list(actual, map))
-    predicted = np.array(predicted)
+    predicted = np.array(map_replace_list(predicted, map))
 
     # count the correct predictions
     correct = (actual == predicted).sum()
