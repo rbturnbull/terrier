@@ -92,8 +92,9 @@ def evaluate_results(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", 
 
     # Map classes to order level
     if not superfamily:
-        exclude_columns = ['file', 'accession', 'prediction', 'probability', 'original_id', 'original_classification']
+        exclude_columns = ['file', 'accession', 'prediction', 'probability', 'original_id', 'original_classification', 'description']
         filtered_columns = [col for col in data.columns if col not in exclude_columns and '/' not in col]
+        print(f"Filtered columns: {filtered_columns}")
         if filtered_columns:
             data["prediction"] = data[filtered_columns].idxmax(axis=1)
             data["probability"] = data[filtered_columns].max(axis=1)
