@@ -181,10 +181,8 @@ scaphiopus_holbrookii_noMasking.fasta.0.te.csv
 repbase.refs.csv
 logs/
 
-oryza.final.TEs.fa
 oryza-terrier.final.TEs.csv
 drosophila-terrier.final.TEs.csv
-drosophila.final.TEs.fa
 lightning_logs/
 comparison-test-data/get-rules.ipynb
 compare.sh

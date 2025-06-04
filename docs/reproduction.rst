@@ -17,13 +17,13 @@ Bickmann et al. (2023) provide Transposable Elements (TE) models of a fruit-fly 
 
 .. code-block:: bash
 
-   wget https://raw.githubusercontent.com/IOB-Muenster/TEclass2/refs/heads/main/tests/drosophila.final.TEs.fa
+   wget https://raw.githubusercontent.com/IOB-Muenster/TEclass2/refs/heads/main/tests/Drosophila_melanogaster.fasta
 
 Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --file drosophila.final.TEs.fa \
+   terrier --file Drosophila_melanogaster.fasta \
         --output-csv drosophila-terrier.final.TEs.csv \
         --min-length 0 \
         --threshold 0
@@ -110,13 +110,13 @@ Bickmann et al. (2023) also provide Transposable Elements (TE) models of a rice 
 
 .. code-block:: bash
 
-   wget https://raw.githubusercontent.com/IOB-Muenster/TEclass2/refs/heads/main/tests/oryza.final.TEs.fa
+   wget https://raw.githubusercontent.com/IOB-Muenster/TEclass2/refs/heads/main/tests/Oryza_sativa.fasta
 
 Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --file oryza.final.TEs.fa --output-csv oryza-terrier.final.TEs.csv --threshold 0
+   terrier --file Oryza_sativa.fasta --output-csv oryza-terrier.final.TEs.csv --threshold 0
 
 .. note::
 
