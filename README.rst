@@ -116,6 +116,16 @@ You can also use the model programmatically:
     terrier = Terrier()
     terrier(file="INPUT.fa", output_fasta="OUTPUT.fa")
 
+
+Potential Use Case
+==================================
+
+A potential workflow is to use `RepeatModeler <https://github.com/Dfam-consortium/RepeatModeler>`_ first to generate a repeat library.
+Then you can use Terrier to attempt to classify the remaining unknown repeats. 
+If you only want highly confident classifications from Terrier, you can set the threshold to 0.9 or higher.
+If you wish to have more coverage, then you can set the threshold lower (or keep it at the default value of 0.7). 
+The modified repeat library can then be used with `RepeatMasker <http://www.repeatmasker.org/>`_ to mask the repeats in your genome assembly.
+
 .. end-quickstart
 
 
