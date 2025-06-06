@@ -9,8 +9,7 @@ import numpy as np
 import plotly.io as pio   
 pio.kaleido.scope.mathjax = None
 
-DEFAULT_WIDTH = 730
-DEFAULT_HEIGHT = 690
+from .defaults import DEFAULT_HEIGHT, DEFAULT_WIDTH
 
 
 def build_map(map:str) -> dict[str,str]:

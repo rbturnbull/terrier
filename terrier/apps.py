@@ -1,56 +1,18 @@
-import pandas as pd
+from typing import TYPE_CHECKING
 from pathlib import Path
 import torchapp as ta
-from torchmetrics import Metric
-from hierarchicalsoftmax.metrics import RankAccuracyTorchMetric
-from hierarchicalsoftmax import inference
-import torch
-from Bio import SeqIO
-from seqbank import SeqBank
 from corgi import Corgi
-from rich.table import Table
-from rich.box import SIMPLE
+from corgi.apps import output_results_bar_chart
 
+from .defaults import DEFAULT_HEIGHT, DEFAULT_WIDTH
 
 from rich.console import Console
 console = Console()
 
-from .repeatmasker import create_repeatmasker_seqtree
-from .evaluate import build_confusion_matrix, confusion_matrix_fig, threshold_fig, evaluate_results, DEFAULT_HEIGHT, DEFAULT_WIDTH, comparison_plot
 
-
-def output_results_bar_chart(predictions: pd.Series, top_k: int = 10, bar_size: int = 80):
-    value_counts = predictions.value_counts()
-    total_categories = len(value_counts)
-    if top_k:
-        original_value_counts = value_counts
-        value_counts = value_counts.iloc[:top_k]
-    table = Table(box=SIMPLE)
-    table.add_column("Prediction", justify="left", style="bold")
-    table.add_column("Proportion", justify="left", style="blue")
-    table.add_column("Count", justify="right")
-    for prediction, count in value_counts.items():
-        proportion = count / len(predictions)
-        bar = "█" * int(proportion * bar_size)
-        table.add_row(prediction, f"{bar} {proportion:.1%}", f"{count}")
-    if total_categories > top_k:
-        count = sum(original_value_counts.iloc[top_k:])
-        proportion = count / len(predictions)
-        bar = "█" * int(proportion * bar_size)
-        table.add_row(
-            "Other Categories",
-            f"{bar} {proportion:.1%}",
-            f"{count}"
-        )
-    # Add line
-    table.add_row('────────────────────', '─' * bar_size, '─' * 10, style="red")
-    table.add_row(
-        "Total",
-        "",
-        f"{len(predictions)}"
-    )
-
-    console.print(table)
+if TYPE_CHECKING:
+    import pandas as pd
+    from torchmetrics import Metric
 
 
 class Terrier(Corgi):
@@ -68,7 +30,9 @@ class Terrier(Corgi):
         return files
 
     @ta.method    
-    def metrics(self) -> list[tuple[str,Metric]]:
+    def metrics(self) -> list[tuple[str,"Metric"]]:
+        from hierarchicalsoftmax.metrics import RankAccuracyTorchMetric
+
         rank_accuracy = RankAccuracyTorchMetric(
             root=self.classification_tree, 
             ranks={1:"accuracy_repeatmasker_type", 2:"accuracy_repeatmasker_subtype"},
@@ -94,6 +58,11 @@ class Terrier(Corgi):
         threshold:float = ta.Param(default=0.7, help="The threshold value for making hierarchical predictions."),
         **kwargs,
     ):        
+        import pandas as pd
+        from hierarchicalsoftmax import inference
+        import torch
+        from Bio import SeqIO
+
         def node_lineage_string(node) -> str:
             if node.is_root:
                 return "Unknown"
@@ -252,6 +221,7 @@ class Terrier(Corgi):
     
     @ta.tool
     def create_repeatmasker_seqtree(self, output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
+        from .repeatmasker import create_repeatmasker_seqtree
         return create_repeatmasker_seqtree(
             output=output,
             repbase=repbase,
@@ -270,6 +240,9 @@ class Terrier(Corgi):
         gamma:float=0.0, 
         partitions:int=5,
     ):
+        from seqbank import SeqBank
+        from .repeatmasker import create_repeatmasker_seqtree
+
         seqbank = SeqBank(path=seqbank, write=True)
         assert repbase is not None
         repbase = Path(repbase)
@@ -296,7 +269,10 @@ class Terrier(Corgi):
         map:str="",
         ignore:str="Unknown",
         threshold:float=None,
-    ) -> pd.DataFrame:
+    ) -> "pd.DataFrame":
+        import pandas as pd
+        from .evaluate import evaluate_results
+
         df = pd.read_csv(csv)
         return evaluate_results(df, superfamily=superfamily, map=map, ignore=ignore, threshold=threshold)
 
@@ -311,7 +287,10 @@ class Terrier(Corgi):
         height:int=DEFAULT_HEIGHT,
         map:str="",
         ignore:str="Unknown",
-    ) -> pd.DataFrame:
+    ) -> "pd.DataFrame":
+        import pandas as pd
+        from .evaluate import threshold_fig
+        
         df = pd.read_csv(csv)
         
         fig = threshold_fig(df, superfamily=superfamily, map=map, ignore=ignore, width=width, height=height)
@@ -341,7 +320,10 @@ class Terrier(Corgi):
         map:str="",
         ignore:str="Unknown",
         threshold:float=None,
-    ) -> pd.DataFrame:
+    ) -> "pd.DataFrame":
+        import pandas as pd
+        from .evaluate import build_confusion_matrix, confusion_matrix_fig
+
         df = pd.read_csv(csv)
         
         cm = build_confusion_matrix(df, superfamily=superfamily, map=map, ignore=ignore, threshold=threshold)
@@ -374,6 +356,7 @@ class Terrier(Corgi):
         threshold:float=None,
     ):
         """ Plot the comparison of Terrier results with the original annotations. """
+        from .evaluate import comparison_plot
         
         fig = comparison_plot(csv, superfamily=superfamily, threshold=threshold)
         

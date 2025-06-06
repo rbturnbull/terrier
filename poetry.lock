@@ -375,14 +375,14 @@ chardet = ">=3.0.2"
 
 [[package]]
 name = "bio-corgi"
-version = "0.5.0a1"
+version = "0.5.0a2"
 description = "Classifier for ORganelle Genomes Inter alia"
 optional = false
 python-versions = "<3.13,>=3.10"
 groups = ["main"]
 files = [
-    {file = "bio_corgi-0.5.0a1-py3-none-any.whl", hash = "sha256:eef5180b5f7b36d3be91aba2c121f323c431f0758c202bf94aefbc7d87aefcca"},
-    {file = "bio_corgi-0.5.0a1.tar.gz", hash = "sha256:cc0e1975facb98ad398adfe7430284cad2df227a7d0d647d325d4973044b2e84"},
+    {file = "bio_corgi-0.5.0a2-py3-none-any.whl", hash = "sha256:ead9af52004ba7f581080819456c6aa157b4068683fb7c8551fcad6d81a6e1f1"},
+    {file = "bio_corgi-0.5.0a2.tar.gz", hash = "sha256:4c1a6839fef5efff05f475e36b44c34b0939a4c504e5a96f03e1ca2ebdbd6e4a"},
 ]
 
 [package.dependencies]
@@ -5131,14 +5131,14 @@ optree = ["optree (>=0.13.0)"]
 
 [[package]]
 name = "torchapp"
-version = "0.5.4"
+version = "0.5.5"
 description = "A wrapper for PyTorch projects to create easy command-line interfaces and manage hyper-parameter tuning."
 optional = false
 python-versions = "<3.13,>=3.10"
 groups = ["main"]
 files = [
-    {file = "torchapp-0.5.4-py3-none-any.whl", hash = "sha256:0a7babef2945ebbdbd9adc184062b347d44cd054ba7422a49e0eb1c33551fc8c"},
-    {file = "torchapp-0.5.4.tar.gz", hash = "sha256:552d869097b96e6260db471ee857b1579b9b6b5ac39ad7c6dd957b1ca372fb55"},
+    {file = "torchapp-0.5.5-py3-none-any.whl", hash = "sha256:b26fbc3d5de6c09acb0a5ff15196aa27e6a3542a84633a59e884b29ee4db6b7a"},
+    {file = "torchapp-0.5.5.tar.gz", hash = "sha256:c668be179441e9b02caf8225dbd07a859f98025be5a21e5a2f8b56fdae81c9d5"},
 ]
 
 [package.dependencies]
@@ -5804,4 +5804,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "0db08756e0ce1191e59aabee75367c3cc34354a8540e84d027bcbe298397d74f"
+content-hash = "30d6d7342864455c1ffe49ced6bbc7b9ce977ff624ad83910d6e771084e45b16"
