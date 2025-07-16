@@ -39,6 +39,8 @@ It is based on ‘corgi’ which was trained to do hierarchical taxonomic classi
 
 This model was trained using the Repbase library of repetitive DNA elements and trained to do hierarchical classification according to the RepeatMasker schema.
 
+An online version of Terrier (using CPUs only) is available at `https://portal.cpg.unimelb.edu.au/tools/terrier <https://portal.cpg.unimelb.edu.au/tools/terrier>`_.
+
 Installation
 ==================================
 
@@ -145,6 +147,8 @@ Terrier was developed by:
 If you use this software, please cite the following preprint:
 
     Robert Turnbull, Neil D. Young, Edoardo Tescari, Lee F. Skerratt, and Tiffany A. Kosch. (2025). 'Terrier: A Deep Learning Repeat Classifier'. `arXiv:2503.09312 <https://arxiv.org/abs/2503.09312>`_.
+
+`Wytamma Wirth <https://wytamma.com/>`_ set up Terrier as a tool at the `Centre for Pathogen Genomics Portal <https://portal.cpg.unimelb.edu.au/>`_ at the University of Melbourne.
 
 This command will generate a bibliography for the Terrier project.
 
