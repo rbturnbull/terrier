@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bio-terrier"
-version = "0.3.2"
+version = "0.3.3"
 description = "Transposable Element Repeat Result classifIER"
 authors = ["Robert Turnbull <robert.turnbull@unimelb.edu.au>"]
 license = "Apache-2.0"

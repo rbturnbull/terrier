@@ -2,7 +2,7 @@
 
 .. start-badges
 
-|pypi badge| |colab badge| |testing badge| |docs badge| |black badge| |torchapp badge|
+|pypi badge| |colab badge| |testing badge| |docs badge| |black badge| |torchapp badge| |doi badge|
 
 .. |pypi badge| image:: https://img.shields.io/pypi/v/bio-terrier?color=blue
    :alt: PyPI - Version
@@ -26,6 +26,8 @@
 .. |colab badge| image:: https://colab.research.google.com/assets/colab-badge.svg
    :target: https://colab.research.google.com/github/rbturnbull/terrier/blob/main/terrier_colab.ipynb
 
+.. |doi badge| image:: https://img.shields.io/badge/DOI-10.1093%2Fbib%2Fbbaf442-blue
+   :target: https://doi.org/10.1093/bib/bbaf442
     
 .. end-badges
 
@@ -160,13 +162,20 @@ Here it is in BibTeX format:
 
 .. code-block:: bibtex
 
-    @article{terrier,
-        title = {{Terrier: A Deep Learning Repeat Classifier}},
-        author = {Turnbull, Robert and Young, Neil D. and Tescari, Edoardo and Skerratt, Lee F. and Kosch, Tiffany A.},
+    @article{terier,
+        author = {Turnbull, Robert and Young, Neil D and Tescari, Edoardo and Skerratt, Lee F and Kosch, Tiffany A},
+        title = {Terrier: a deep learning repeat classifier},
+        journal = {Briefings in Bioinformatics},
+        volume = {26},
+        number = {4},
+        pages = {bbaf442},
         year = {2025},
-        journal = {arXiv},
-        url = {https://arxiv.org/abs/2503.09312},
-        doi = {10.48550/arXiv.2503.09312}
+        month = {08},
+        abstract = {Repetitive DNA sequences underpin genome architecture and evolutionary processes, yet they remain challenging to classify accurately. Terrier is a deep learning model designed to overcome these challenges by classifying repetitive DNA sequences using a publicly available, curated repeat sequence library trained under the RepeatMasker schema. Poor representation of taxa within repeat databases often limits the classification accuracy and reproducibility of current repeat annotation methods, limiting our understanding of repeat evolution and function. Terrier overcomes these challenges by leveraging deep learning for improved accuracy. Trained on Repbase, which includes over 100,000 repeat families—four times more than Dfam—Terrier maps 97.1\% of Repbase sequences to RepeatMasker categories, offering the most comprehensive classification system available. When benchmarked against DeepTE, TERL, and TEclass2 in model organisms (rice, fruit flies, humans, and mice), Terrier achieved superior accuracy while classifying a broader range of sequences. Further validation in non-model amphibian, flatworm, and Northern krill genomes highlights its effectiveness in improving classification in non-model species, facilitating research on repeat-driven evolution, genomic instability, and phenotypic variation.},
+        issn = {1477-4054},
+        doi = {10.1093/bib/bbaf442},
+        url = {https://doi.org/10.1093/bib/bbaf442},
+        eprint = {https://academic.oup.com/bib/article-pdf/26/4/bbaf442/64143069/bbaf442.pdf},
     }
 
 Run the following command to get the latest BibTeX entry:
