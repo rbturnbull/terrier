@@ -233,7 +233,7 @@ class Terrier(Corgi):
     @ta.tool
     def preprocess(
         self, 
-        repbase:Path=ta.Param(..., help="The path to the RepBase fasta directory."), 
+        input:list[Path]=ta.Param(..., help="The path to a FASTA file, multiple FASTA files or a directory of FASTA files (e.g. the RepBase FASTA directory)"),
         seqbank:Path=ta.Param(..., help="The path to save the new SeqBank file."), 
         seqtree:Path=ta.Param(..., help="The path to save the new SeqTree file."), 
         label_smoothing:float=0.0, 
@@ -243,23 +243,43 @@ class Terrier(Corgi):
         from seqbank import SeqBank
         from .repeatmasker import create_repeatmasker_seqtree
 
+        ALLOWABLE_EXTENSIONS = [
+            "fasta",
+            "fa",
+            "fna",
+            "ref",
+        ]
+
         seqbank = SeqBank(path=seqbank, write=True)
-        assert repbase is not None
-        repbase = Path(repbase)
-        assert repbase.exists()
+
+        # File all the FASTA files
+        fasta_paths = []
+        for input_path in input:
+            input_path = Path(input_path)
+            if input_path.is_dir():
+                for extension in ALLOWABLE_EXTENSIONS:
+                    fasta_paths += list(input_path.glob(f'*.{extension}'))
+            elif input_path.is_file() and input_path.exists():
+                fasta_paths.append(input_path)
+        assert len(fasta_paths), (
+            f"No FASTA files found. "
+            f"Make sure you provide at least one file or a directory of files with an expected FASTA extension:"
+            f"({', '.join(ALLOWABLE_EXTENSIONS)})"
+        )
 
         # Create the seqbank from the FASTA files with .ref extension
-        files = list(repbase.glob('*.ref'))
-        seqbank.add_files(files, format="fasta")
+        seqbank.add_files(fasta_paths, format="fasta")
 
         # Create the seqtree
-        return create_repeatmasker_seqtree(
-            output=seqtree,
-            repbase=repbase,
+        seqtree_path = Path(seqtree)
+        seqtree = create_repeatmasker_seqtree(
+            paths=fasta_paths,
             label_smoothing=label_smoothing,
             gamma=gamma,
             partitions=partitions,
         )
+        seqtree.save(seqtree_path)
+        seqtree.classification_tree.render(print=1)
 
     @ta.tool
     def evaluate(
