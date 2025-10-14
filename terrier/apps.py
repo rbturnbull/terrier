@@ -219,16 +219,18 @@ class Terrier(Corgi):
     def checkpoint(self, checkpoint:Path=None) -> str:
         return checkpoint or "https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt"
     
-    def find_fasta_paths(self, files:list[Path]) -> list[Path]:
+    def find_fasta_paths(self, files:list[str]) -> list[Path]:
         ALLOWABLE_EXTENSIONS = [
             "fasta",
             "fa",
             "fna",
+            "fas",
             "ref",
         ]
         fasta_paths = []
         for file in files:
-            file = Path(file)
+            file = self.process_location(file)
+
             if file.is_dir():
                 for extension in ALLOWABLE_EXTENSIONS:
                     fasta_paths += list(file.glob(f'*.{extension}'))
@@ -239,13 +241,12 @@ class Terrier(Corgi):
             f"Make sure you provide at least one file or a directory of files with an expected FASTA extension:"
             f"({', '.join(ALLOWABLE_EXTENSIONS)})"
         )
-        fasta_paths = [self.process_location(file) for file in fasta_paths]
         return fasta_paths
 
     @ta.tool
     def preprocess(
         self, 
-        input:list[Path]=ta.Param(..., help="The path to a FASTA file, multiple FASTA files or a directory of FASTA files (e.g. the RepBase FASTA directory)"),
+        input:list[str]=ta.Param(..., help="The path to a FASTA file, URL to a FASTA file, multiple FASTA files or a directory of FASTA files (e.g. the RepBase FASTA directory)"),
         seqbank:Path=ta.Param(None, help="The path to save the new SeqBank file."), 
         seqtree:Path=ta.Param(None, help="The path to save the new SeqTree file."), 
         label_smoothing:float=0.0, 
