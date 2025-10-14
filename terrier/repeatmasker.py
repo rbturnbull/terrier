@@ -4,9 +4,42 @@ from Bio import SeqIO
 import toml
 from corgi.seqtree import SeqTree
 from collections import Counter
+import gzip
 
 
-def create_repeatmasker_seqtree(output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
+def open_maybe_gz(file:Path):
+    if file.name.endswith('.gz'):
+        return gzip.open(file, "rt")
+    else:
+        return open(file, "r")
+
+
+def get_verbatim_classification(path:Path, record) -> str:
+    accession = record.id
+
+    description = record.description
+
+    if "#" in description:
+        description = description[ description.find("#")+1 : ]
+    
+    components = description.split("\t")
+    if len(components) >= 2:
+        return components[1]
+
+    if path.name == "simple.ref":
+        return "Simple Repeat"
+    elif accession.startswith("SINE_"):
+        return "SINE"
+    else:
+        return description
+
+
+def create_repeatmasker_seqtree(
+    fasta_paths:list[Path], 
+    label_smoothing:float=0.0, 
+    gamma:float=0.0, 
+    partitions:int=5,
+) -> SeqTree:
     with open(Path(__file__).parent/"data/repbase-to-repeatmasker.toml", "r") as f:
         mapping = toml.load(f)
 
@@ -21,45 +54,49 @@ def create_repeatmasker_seqtree(output:Path, repbase:Path, label_smoothing:float
 
     # Read files
     count = 0
-    for file in repbase.glob('*.ref'):
-        with open(file) as f:
+    for file in fasta_paths:
+        with open_maybe_gz(file) as f:
             for record in SeqIO.parse(f, "fasta"):
                 partition = count % partitions
                 accession = record.id
 
-                components = record.description.split("\t")
-                if len(components) != 3:
-                    if file.name == "simple.ref":
-                        classification = "Simple Repeat"
-                    elif accession.startswith("SINE_"):
-                        classification = "SINE"
-                    else:
-                        continue
-                else:
-                    classification = components[1]
+                classification = get_verbatim_classification(file, record)
 
-                if classification not in mapping:
+                if classification in mapping:
+                    mapped_counter.update([classification])
+                    classification = mapping[classification]
+
+                if classification not in mapping.values():
                     not_mapped_counter.update([classification])
                     continue
 
-                mapped_counter.update([classification])
-
-                repeat_name = mapping[classification]
-                if repeat_name == "Unknown":
+                if classification == "Unknown":
                     continue
 
-                if repeat_name not in classification_nodes:
-                    components = repeat_name.split("/")
+                if classification not in classification_nodes:
+                    components = classification.split("/")
                     repeat_type = components[0]
                     repeat_subtype = components[1] if len(components) > 1 else ""
 
                     if repeat_type not in classification_nodes:
-                        classification_nodes[repeat_type] = SoftmaxNode(repeat_type, parent=classification_tree, label_smoothing=label_smoothing, gamma=gamma, repeat_masker_name=repeat_type)
+                        classification_nodes[repeat_type] = SoftmaxNode(
+                            repeat_type, 
+                            parent=classification_tree, 
+                            label_smoothing=label_smoothing, 
+                            gamma=gamma, 
+                            repeat_masker_name=repeat_type,
+                        )
                     repeat_type_node = classification_nodes[repeat_type]
                     if repeat_subtype:
-                        classification_nodes[repeat_name] = SoftmaxNode(repeat_subtype, parent=repeat_type_node, label_smoothing=label_smoothing, gamma=gamma, repeat_masker_name=repeat_name)
+                        classification_nodes[classification] = SoftmaxNode(
+                            repeat_subtype, 
+                            parent=repeat_type_node, 
+                            label_smoothing=label_smoothing, 
+                            gamma=gamma, 
+                            repeat_masker_name=classification,
+                        )
 
-                node = classification_nodes[repeat_name]
+                node = classification_nodes[classification]
             
                 try:
                     seqtree.add(accession, node, partition)
@@ -68,13 +105,11 @@ def create_repeatmasker_seqtree(output:Path, repbase:Path, label_smoothing:float
 
                 count += 1
 
-    print("repbase,count,mapped,repeat_masker")
+    print("provided,count,mapped,repeat_masker")
     for classification,count in mapped_counter.most_common():
         print(classification,count,1, mapping[classification], sep=",")
     for classification,count in not_mapped_counter.most_common():
         print(classification,count,0, "", sep=",")
 
-    seqtree.save(output)
-    seqtree.classification_tree.render(print=1)
-
+    return seqtree
 

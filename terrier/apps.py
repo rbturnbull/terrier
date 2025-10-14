@@ -220,22 +220,11 @@ class Terrier(Corgi):
         return checkpoint or "https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt"
     
     @ta.tool
-    def create_repeatmasker_seqtree(self, output:Path, repbase:Path, label_smoothing:float=0.0, gamma:float=0.0, partitions:int=5):
-        from .repeatmasker import create_repeatmasker_seqtree
-        return create_repeatmasker_seqtree(
-            output=output,
-            repbase=repbase,
-            label_smoothing=label_smoothing,
-            gamma=gamma,
-            partitions=partitions,
-        )
-
-    @ta.tool
     def preprocess(
         self, 
-        repbase:Path=ta.Param(..., help="The path to the RepBase fasta directory."), 
-        seqbank:Path=ta.Param(..., help="The path to save the new SeqBank file."), 
-        seqtree:Path=ta.Param(..., help="The path to save the new SeqTree file."), 
+        input:list[str]=ta.Param(..., help="The path to a FASTA file, URL to a FASTA file, multiple FASTA files or a directory of FASTA files (e.g. the RepBase FASTA directory)"),
+        seqbank:Path=ta.Param(None, help="The path to save the new SeqBank file."), 
+        seqtree:Path=ta.Param(None, help="The path to save the new SeqTree file."), 
         label_smoothing:float=0.0, 
         gamma:float=0.0, 
         partitions:int=5,
@@ -243,23 +232,26 @@ class Terrier(Corgi):
         from seqbank import SeqBank
         from .repeatmasker import create_repeatmasker_seqtree
 
-        seqbank = SeqBank(path=seqbank, write=True)
-        assert repbase is not None
-        repbase = Path(repbase)
-        assert repbase.exists()
+        assert seqbank or seqtree, "You must provide either a --seqbank or --seqtree output path (usually both)."
 
-        # Create the seqbank from the FASTA files with .ref extension
-        files = list(repbase.glob('*.ref'))
-        seqbank.add_files(files, format="fasta")
+        fasta_paths = self.find_fasta_paths(input)
+        
+        # Create the seqbank from the FASTA files
+        if seqbank:
+            seqbank = SeqBank(path=seqbank, write=True)
+            seqbank.add_files(fasta_paths, format="fasta")
 
         # Create the seqtree
-        return create_repeatmasker_seqtree(
-            output=seqtree,
-            repbase=repbase,
-            label_smoothing=label_smoothing,
-            gamma=gamma,
-            partitions=partitions,
-        )
+        if seqtree:
+            seqtree_path = Path(seqtree)
+            seqtree = create_repeatmasker_seqtree(
+                fasta_paths=fasta_paths,
+                label_smoothing=label_smoothing,
+                gamma=gamma,
+                partitions=partitions,
+            )
+            seqtree.save(seqtree_path)
+            seqtree.render(print=1, count=True)
 
     @ta.tool
     def evaluate(

@@ -7,7 +7,7 @@ After performing the instructions on the :ref:`preprocessing:Preprocessing` page
 
 To train Terrier, you will need to use the `terrier-tools` CLI utility.
 
-To use the same hyperparameters as in the main release of Terrier, you can run the following command:
+To train with the default settings of Terrier, you can run the following command:
 
 .. code-block:: bash
 
@@ -16,6 +16,19 @@ To use the same hyperparameters as in the main release of Terrier, you can run t
     terrier-tools train \
         --seqtree $SEQTREE \
         --seqbank $SEQBANK
+
+If you want to train using the pretrained Terrier model weights as a starting point, you can add the ``--pretrained`` flag:
+
+.. code-block:: bash
+
+    SEQBANK=$REPBASE_DIR/Repbase-seqbank.sb
+    SEQTREE=$REPBASE_DIR/Repbase-seqtree.st
+    terrier-tools train         \
+        --seqtree $SEQTREE         \
+        --seqbank $SEQBANK         \
+        --pretrained default
+
+You can replace the word ``default`` with a path to a checkpoint file if you have one or to a URL to a checkpoint file.
 
 You can see other command-line options by running:
 

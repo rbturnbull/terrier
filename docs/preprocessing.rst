@@ -28,7 +28,7 @@ These two files can be generated from the Repbase database using the ``terrier-t
 
 .. code-block:: bash
 
-    terrier-tools preprocess --repbase $REPBASE_DIR --seqbank $REPBASE_DIR/Repbase-seqbank.sb --seqtree $REPBASE_DIR/Repbase-seqtree.st
+    terrier-tools preprocess --input $REPBASE_DIR --seqbank $REPBASE_DIR/Repbase-seqbank.sb --seqtree $REPBASE_DIR/Repbase-seqtree.st
 
 This will create a SeqBank file called ``Repbase-seqbank.sb`` and a SeqTree files called ``Repbase-seqtree.st`` and place them the ``$REPBASE_DIR``. 
 
@@ -46,13 +46,13 @@ Now you are ready to train Terrier using the SeqBank and SeqTree files you have 
 Optional: Display the SeqTree
 ------------------------------
 
-You can list the number of accessions for each node in the SeqTree file with this command:
+You can list the number of sequences for each node in the SeqTree file with this command:
 
 .. code-block:: bash
 
     seqtree render $REPBASE_DIR/Repbase-seqtree.st --print --count
 
-That will output a tree with the number of accessions like this:
+That will output a tree with the number of sequences like this:
 
 .. code-block:: text
 
@@ -125,3 +125,32 @@ This will create an HTML file with the Sunburst chart of the SeqTree like this:
 You can open the HTML file in a browser to view the chart.
 
 You can also output the SeqTree with a .png, .svg, or .pdf extension by changing the extension of the output file.
+
+Custom Datasets
+----------------
+
+You can create a custom repeat library in FASTA format, with the classification of each sequence like this:
+
+.. code-block:: text
+
+    >SeqID#DNA/Academ
+    ACTGACTGACTG...
+
+Or with the classification separated with a tab character like this:
+
+.. code-block:: text
+
+    >SeqID	LTR/Caulimovirus
+    ACTGACTGACTG...
+
+Then preprocess like this:
+
+.. code-block:: bash
+
+        terrier-tools preprocess --input custom.fasta --seqbank custom-seqbank.sb --seqtree custom-seqtree.st
+
+You can include Repbase with your custom dataset like this:
+
+.. code-block:: bash
+
+        terrier-tools preprocess --input $REPBASE_DIR --input custom.fasta --seqbank combined-seqbank.sb --seqtree combined-seqtree.st
