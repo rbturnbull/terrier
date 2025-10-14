@@ -274,7 +274,7 @@ class Terrier(Corgi):
                 partitions=partitions,
             )
             seqtree.save(seqtree_path)
-            seqtree.classification_tree.render(print=1, count=True)
+            seqtree.render(print=1, count=True)
 
     @ta.tool
     def evaluate(
