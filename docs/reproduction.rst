@@ -20,7 +20,7 @@ Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --input https://raw.githubusercontent.com/IOB-Muenster/TEclass2/refs/heads/main/tests/drosophila.final.TEs.fa \
+   terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Drosophila_melanogaster.fasta \
         --output-csv drosophila-terrier.final.TEs.csv \
         --min-length 0 \
         --threshold 0
@@ -109,7 +109,7 @@ Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --intput https://raw.githubusercontent.com/IOB-Muenster/TEclass2/refs/heads/main/tests/oryza.final.TEs.fa \
+   terrier --intput https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Oryza_sativa.fasta \
        --output-csv oryza-terrier.final.TEs.csv --threshold 0
 
 .. note::
@@ -189,15 +189,11 @@ Human Genome
 ================
 
 
-.. code-block:: bash
-
-   wget https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Homo_sapiens.fasta
-
 Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --input Homo_sapiens.fasta --output-csv Terrier-human.csv --threshold 0
+   terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Homo_sapiens.fasta --output-csv Terrier-human.csv --threshold 0
 
 
 Now evaluate the results with the following command:
@@ -229,15 +225,11 @@ Mouse Genome
 ================
 
 
-.. code-block:: bash
-
-   wget https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Mus_musculus.fasta
-
 Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --input Mus_musculus.fasta --output-csv Terrier-mouse.csv --threshold 0
+   terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Mus_musculus.fasta --output-csv Terrier-mouse.csv --threshold 0
 
 
 Now evaluate the results with the following command:

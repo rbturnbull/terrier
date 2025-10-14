@@ -149,8 +149,14 @@ Then preprocess like this:
 
         terrier-tools preprocess --input custom.fasta --seqbank custom-seqbank.sb --seqtree custom-seqtree.st
 
+.. warning ::
+
+    Terrier will only be able to classify sequences into classes found here: https://github.com/rbturnbull/terrier/blob/main/terrier/data/repbase-to-repeatmasker.toml
+
 You can include Repbase with your custom dataset like this:
 
 .. code-block:: bash
 
         terrier-tools preprocess --input $REPBASE_DIR --input custom.fasta --seqbank combined-seqbank.sb --seqtree combined-seqtree.st
+
+
