@@ -4,6 +4,14 @@ from Bio import SeqIO
 import toml
 from corgi.seqtree import SeqTree
 from collections import Counter
+import gzip
+
+
+def open_maybe_gz(file:Path):
+    if file.name.endswith('.gz'):
+        return gzip.open(file, "rt")
+    else:
+        return open(file, "r")
 
 
 def get_verbatim_classification(path:Path, record) -> str:
@@ -47,7 +55,7 @@ def create_repeatmasker_seqtree(
     # Read files
     count = 0
     for file in fasta_paths:
-        with open(file) as f:
+        with open_maybe_gz(file) as f:
             for record in SeqIO.parse(f, "fasta"):
                 partition = count % partitions
                 accession = record.id

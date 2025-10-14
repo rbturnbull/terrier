@@ -220,27 +220,32 @@ class Terrier(Corgi):
         return checkpoint or "https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt"
     
     def find_fasta_paths(self, files:list[str]) -> list[Path]:
-        ALLOWABLE_EXTENSIONS = [
-            "fasta",
-            "fa",
-            "fna",
-            "fas",
-            "ref",
-        ]
-        fasta_paths = []
-        for file in files:
-            file = self.process_location(file)
+        base_extensions = {".fa", ".fasta", ".fna", ".fas", ".frn", ".ref"}
 
-            if file.is_dir():
-                for extension in ALLOWABLE_EXTENSIONS:
-                    fasta_paths += list(file.glob(f'*.{extension}'))
-            elif file.is_file() and file.exists():
-                fasta_paths.append(file)
-        assert len(fasta_paths), (
-            f"No FASTA files found. "
-            f"Make sure you provide at least one file or a directory of files with an expected FASTA extension:"
-            f"({', '.join(ALLOWABLE_EXTENSIONS)})"
-        )
+        # Function to check if a file matches allowed extensions (including .gz)
+        def matches_extensions(file: Path):
+            return (
+                file.suffix in base_extensions or
+                (file.suffix == ".gz" and any(file.stem.endswith(ext) for ext in base_extensions))
+            )
+
+        # Expand the list
+        fasta_paths = []
+
+        # If 'files' is a string or Path, convert it to a list
+        if isinstance(files, (str,Path)):
+            fasta_paths = [files]
+
+        for path in files:
+            path = self.process_location(path)
+            if path.is_dir():
+                # If it's a directory, find all files with the specified extensions
+                fasta_paths.extend([file for file in path.rglob("*") if matches_extensions(file)])
+            else:
+                # If it's not a directory, add the file to the list
+                if matches_extensions(path):
+                    fasta_paths.append(path)
+
         return fasta_paths
 
     @ta.tool
