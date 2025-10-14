@@ -15,7 +15,7 @@ def get_verbatim_classification(path:Path, record) -> str:
         description = description[ description.find("#")+1 : ]
     
     components = description.split("\t")
-    if len(components) == 3:
+    if len(components) >= 2:
         return components[1]
 
     if path.name == "simple.ref":
