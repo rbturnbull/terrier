@@ -242,7 +242,7 @@ class Terrier(Corgi):
         fasta_paths = [self.process_location(file) for file in fasta_paths]
         return fasta_paths
 
-    @ta.tool("create_repeatmasker_seqtree")
+    @ta.tool
     def preprocess(
         self, 
         input:list[Path]=ta.Param(..., help="The path to a FASTA file, multiple FASTA files or a directory of FASTA files (e.g. the RepBase FASTA directory)"),
