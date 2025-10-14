@@ -7,7 +7,7 @@ After performing the instructions on the :ref:`preprocessing:Preprocessing` page
 
 To train Terrier, you will need to use the `terrier-tools` CLI utility.
 
-To use the same hyperparameters as in the main release of Terrier, you can run the following command:
+To train with the default settings of Terrier, you can run the following command:
 
 .. code-block:: bash
 
