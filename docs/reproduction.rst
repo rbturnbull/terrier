@@ -252,6 +252,12 @@ Now evaluate the results with the following command:
         --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/I,/Jockey.*=/I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
 
 
+.. code-block:: text
+
+   Total with ground truth: 1465
+   Number classified: 1204/1465 (82.18%)
+   Correct predictions: 1129/1204 (93.77%)
+
 To generate a confusion matrix, use the following command:
 
 .. code-block:: bash
