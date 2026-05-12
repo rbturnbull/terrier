@@ -43,6 +43,17 @@ This model was trained using the Repbase library of repetitive DNA elements and 
 
 An online version of Terrier (using CPUs only) is available at `https://portal.cpg.unimelb.edu.au/tools/terrier <https://portal.cpg.unimelb.edu.au/tools/terrier>`_.
 
+Latest Results
+==================================
+
+Terrier v0.4 was released and this was trained on RepBase31.04 (released 04-23-2026)
+which as substantially more sequences than the previous version (RepBase29.10)
+used to train the version of Terrier for the publication in Briefings in Bioinformatics (2025).
+
+This has altered the performance of the model. 
+
+See the `Latest Results <https://rbturnbull.github.io/terrier/latest/>`_ page for the performance of both versions of Terrier on the test data.
+
 Installation
 ==================================
 
