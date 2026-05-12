@@ -75,7 +75,7 @@ class Terrier(Corgi):
             return node_string
 
         classification_probabilities = inference.node_probabilities(results[0], root=self.classification_tree)
-        category_names = [node_lineage_string(node) for node in self.classification_tree.node_list if not node.is_root]
+        category_names = [node_lineage_string(node) for node in self.classification_tree.node_list_softmax]
 
         chunk_details = pd.DataFrame(self.dataloader.chunk_details, columns=["file", "original_id", "description", "chunk"])
         predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=category_names)
