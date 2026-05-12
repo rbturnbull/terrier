@@ -78,7 +78,7 @@ To run inference on a FASTA file, run this command:
 
 .. code-block:: bash
 
-    terrier --file INPUT.fa --output-fasta OUTPUT.fa
+    terrier --input INPUT.fa --output-fasta OUTPUT.fa
 
 That will add the classification to after the sequence ID in the `OUTPUT.fa` FASTA file.
 
@@ -86,15 +86,21 @@ If you want to save the probabilities for all classes run this:
 
 .. code-block:: bash
 
-    terrier --file INPUT.fa --output-csv OUTPUT.csv
+    terrier --input INPUT.fa --output-csv OUTPUT.csv
 
 The columns will be the probability of each classification and the rows correspond to each sequence in ``INPUT.fa``.
+
+You can also use a URL as the input:
+
+.. code-block:: bash
+
+    terrier --input https://example.com/INPUT.fasta.gz --output-fasta OUTPUT.fa
 
 If you want to output a visualization of the prediction probabilities:
 
 .. code-block:: bash
 
-    terrier --file INPUT.fa --image-dir OUTPUT-IMAGES/
+    terrier --input INPUT.fa --image-dir OUTPUT-IMAGES/
 
 The outputs for the above can be combined together. For more options run 
 

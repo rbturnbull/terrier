@@ -15,15 +15,12 @@ Fruit Fly Genome
 
 Bickmann et al. (2023) provide Transposable Elements (TE) models of a fruit-fly genome. Download it with the following command:
 
-.. code-block:: bash
-
-   wget https://raw.githubusercontent.com/IOB-Muenster/TEclass2/refs/heads/main/tests/Drosophila_melanogaster.fasta
 
 Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --file Drosophila_melanogaster.fasta \
+   terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Drosophila_melanogaster.fasta \
         --output-csv drosophila-terrier.final.TEs.csv \
         --min-length 0 \
         --threshold 0
@@ -108,15 +105,12 @@ Rice Genome
 
 Bickmann et al. (2023) also provide Transposable Elements (TE) models of a rice genome. Download it with the following command:
 
-.. code-block:: bash
-
-   wget https://raw.githubusercontent.com/IOB-Muenster/TEclass2/refs/heads/main/tests/Oryza_sativa.fasta
-
 Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --file Oryza_sativa.fasta --output-csv oryza-terrier.final.TEs.csv --threshold 0
+   terrier --intput https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Oryza_sativa.fasta \
+       --output-csv oryza-terrier.final.TEs.csv --threshold 0
 
 .. note::
 
@@ -195,15 +189,11 @@ Human Genome
 ================
 
 
-.. code-block:: bash
-
-   wget https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Homo_sapiens.fasta
-
 Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --file Homo_sapiens.fasta --output-csv Terrier-human.csv --threshold 0
+   terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Homo_sapiens.fasta --output-csv Terrier-human.csv --threshold 0
 
 
 Now evaluate the results with the following command:
@@ -235,15 +225,11 @@ Mouse Genome
 ================
 
 
-.. code-block:: bash
-
-   wget https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Mus_musculus.fasta
-
 Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --file Mus_musculus.fasta --output-csv Terrier-mouse.csv --threshold 0
+   terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Mus_musculus.fasta --output-csv Terrier-mouse.csv --threshold 0
 
 
 Now evaluate the results with the following command:
