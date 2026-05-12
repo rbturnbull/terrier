@@ -52,7 +52,7 @@ used to train the version of Terrier for the publication in Briefings in Bioinfo
 
 This has altered the performance of the model. 
 
-See the `Latest Results <https://rbturnbull.github.io/terrier/latest/>`_ page for the performance of both versions of Terrier on the test data.
+See the `Latest Results <https://rbturnbull.github.io/terrier/latest.html>`_ page for the performance of both versions of Terrier on the test data.
 
 Installation
 ==================================
