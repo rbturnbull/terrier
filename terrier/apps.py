@@ -75,7 +75,13 @@ class Terrier(Corgi):
             return node_string
 
         classification_probabilities = inference.node_probabilities(results[0], root=self.classification_tree)
-        category_names = [node_lineage_string(node) for node in self.classification_tree.node_list if not node.is_root]
+        if hasattr(self.classification_tree, "node_list_softmax"):
+            category_names = [node_lineage_string(node) for node in self.classification_tree.node_list_softmax]
+        else:
+            # Backwards compatibility for older seqtree files which don't have the node_list_softmax attribute, 
+            # in which case we just use all non-root nodes as categories. 
+            # This is the case for Terrier 0.3 and earlier.
+            category_names = [node_lineage_string(node) for node in self.classification_tree.node_list if not node.is_root]
 
         chunk_details = pd.DataFrame(self.dataloader.chunk_details, columns=["file", "original_id", "description", "chunk"])
         predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=category_names)
@@ -217,7 +223,7 @@ class Terrier(Corgi):
         return results_df
 
     def checkpoint(self, checkpoint:Path=None) -> str:
-        return checkpoint or "https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt"
+        return checkpoint or "https://github.com/rbturnbull/terrier/releases/download/v0.4.0/terrier-0.4.ckpt"
     
     @ta.tool
     def preprocess(
@@ -281,13 +287,11 @@ class Terrier(Corgi):
         ignore:str="Unknown",
     ) -> "pd.DataFrame":
         import pandas as pd
-        from .evaluate import threshold_fig
+        from .evaluate import threshold_fig, show_fig
         
         df = pd.read_csv(csv)
         
         fig = threshold_fig(df, superfamily=superfamily, map=map, ignore=ignore, width=width, height=height)
-        if show:
-            fig.show()
 
         if output:
             output = Path(output)
@@ -298,6 +302,9 @@ class Terrier(Corgi):
                     fig.write_html(str(output))
                 case _:
                     fig.write_image(str(output), engine="kaleido")
+
+        if show:
+            show_fig(fig)
 
 
     @ta.tool
@@ -314,14 +321,12 @@ class Terrier(Corgi):
         threshold:float=None,
     ) -> "pd.DataFrame":
         import pandas as pd
-        from .evaluate import build_confusion_matrix, confusion_matrix_fig
+        from .evaluate import build_confusion_matrix, confusion_matrix_fig, show_fig
 
         df = pd.read_csv(csv)
         
         cm = build_confusion_matrix(df, superfamily=superfamily, map=map, ignore=ignore, threshold=threshold)
         fig = confusion_matrix_fig(cm, width=width, height=height, title=f"{csv.name} Confusion Matrix")
-        if show:
-            fig.show()
 
         if output:
             output = Path(output)
@@ -335,6 +340,9 @@ class Terrier(Corgi):
                 case _:
                     fig.write_image(str(output), engine="kaleido")
         
+        if show:
+            show_fig(fig)
+
         return cm
 
 
@@ -348,12 +356,9 @@ class Terrier(Corgi):
         threshold:float=None,
     ):
         """ Plot the comparison of Terrier results with the original annotations. """
-        from .evaluate import comparison_plot
+        from .evaluate import comparison_plot, show_fig
         
         fig = comparison_plot(csv, superfamily=superfamily, threshold=threshold)
-        
-        if show:
-            fig.show()
 
         if output:
             output = Path(output)
@@ -365,6 +370,9 @@ class Terrier(Corgi):
                 case _:
                     fig.write_image(str(output), engine="kaleido")
         
+        if show:
+            show_fig(fig)
+
         return fig
 
     def package_name(self) -> str:

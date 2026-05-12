@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from terrier.evaluate import evaluate_metrics, confusion_matrix_fig, build_confusion_matrix, format_fig
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots

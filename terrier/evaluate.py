@@ -1,3 +1,5 @@
+import os
+import sys
 from pathlib import Path
 import pandas as pd
 import re
@@ -10,6 +12,14 @@ import plotly.io as pio
 pio.kaleido.scope.mathjax = None
 
 from .defaults import DEFAULT_HEIGHT, DEFAULT_WIDTH
+
+
+def show_fig(fig:go.Figure):
+    try:
+        fig.show()
+    except Exception as e:
+        print("Could not show figure, likely due to missing display. Please save the figure and view it locally.")
+        print(f"Error: {e}")
 
 
 def build_map(map:str) -> dict[str,str]:

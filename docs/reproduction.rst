@@ -21,7 +21,7 @@ Run inference using Terrier like this:
 .. code-block:: bash
 
    terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Drosophila_melanogaster.fasta \
-        --output-csv drosophila-terrier.final.TEs.csv \
+        --output-csv Terrier-fruit-fly.csv \
         --min-length 0 \
         --threshold 0
 
@@ -35,17 +35,19 @@ Now evaluate the results with the following command:
 
 .. code-block:: bash
 
-   terrier-tools evaluate --csv drosophila-terrier.final.TEs.csv  \
+   terrier-tools evaluate --csv Terrier-fruit-fly.csv  \
         --threshold 0.7 \
         --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC 
         
 That will produce the following output:
 
+.. code-block:: text
+
    Total: 667
    Total with ground truth: 661
-   Number classified: 424/661 (64.15%)
-   Correct predictions: 386/424 (91.04%)
-   
+   Number classified: 440/661 (66.57%)
+   Correct predictions: 404/440 (91.82%)
+
 .. note::
 
    The dataset includes six sequences with the 'Unknown' label. That is why there is a difference between the 'Total' and 'Total with ground truth' values.
@@ -54,7 +56,7 @@ To get the accuracy results just for the 'Order' level and ignoring the 'Superfa
 
 .. code-block:: bash
 
-   terrier-tools evaluate --csv drosophila-terrier.final.TEs.csv  \
+   terrier-tools evaluate --csv Terrier-fruit-fly.csv  \
         --threshold 0.7 \
         --no-superfamily \
         --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
@@ -65,14 +67,14 @@ That will produce the following output:
 
    Total: 667
    Total with ground truth: 661
-   Number classified: 539/661 (81.54%)
-   Correct predictions: 474/539 (87.94%)
+   Number classified: 544/661 (82.30%)
+   Correct predictions: 482/544 (88.60%)
 
 To generate a confusion matrix, use the following command:
 
 .. code-block:: bash
 
-   terrier-tools confusion-matrix --csv drosophila-terrier.final.TEs.csv  \
+   terrier-tools confusion-matrix --csv Terrier-fruit-fly.csv  \
         --output drosophila-terrier-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
         --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
@@ -90,7 +92,7 @@ To see the effect of the threshold on the results, you can run the following com
 
 .. code-block:: bash
 
-   terrier-tools threshold-plot --csv drosophila-terrier.final.TEs.csv  \
+   terrier-tools threshold-plot --csv Terrier-fruit-fly.csv  \
         --output drosophila-terrier-threshold-plot.html \
         --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
@@ -109,8 +111,8 @@ Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --intput https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Oryza_sativa.fasta \
-       --output-csv oryza-terrier.final.TEs.csv --threshold 0
+   terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Oryza_sativa.fasta \
+       --output-csv Terrier-rice.csv --threshold 0
 
 .. note::
 
@@ -121,7 +123,7 @@ Now evaluate the results with the following command:
 
 .. code-block:: bash
 
-   terrier-tools evaluate --csv oryza-terrier.final.TEs.csv  \
+   terrier-tools evaluate --csv Terrier-rice.csv  \
         --threshold 0.7 \
         --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
@@ -129,16 +131,16 @@ That will produce the following output:
 
 .. code-block:: text
 
-    Total: 75
-    Total with ground truth: 75
-    Number classified: 68/75 (90.67%)
-    Correct predictions: 67/68 (98.53%)
+   Total: 75
+   Total with ground truth: 75
+   Number classified: 69/75 (92.00%)
+   Correct predictions: 68/69 (98.55%)
 
 To get the accuracy results just for the 'Order' level and ignoring the 'Superfamily' level, use the following command:
 
 .. code-block:: bash
 
-   terrier-tools evaluate --csv oryza-terrier.final.TEs.csv  \
+   terrier-tools evaluate --csv Terrier-rice.csv  \
         --threshold 0.7 \
         --no-superfamily \
         --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
@@ -147,16 +149,17 @@ That will produce the following output:
 
 .. code-block:: text
 
-    Total: 75
-    Total with ground truth: 75
-    Number classified: 71/75 (94.67%)
-    Correct predictions: 67/71 (94.37%)
+   Total: 75
+   Total with ground truth: 75
+   Filtered columns: ['LTR', 'SINE', 'DNA', 'Satellite', 'LINE', 'RC', 'Structural_RNA', 'PLE', 'Other']
+   Number classified: 73/75 (97.33%)
+   Correct predictions: 69/73 (94.52%)
 
 To generate a confusion matrix, use the following command:
 
 .. code-block:: bash
 
-   terrier-tools confusion-matrix --csv oryza-terrier.final.TEs.csv  \
+   terrier-tools confusion-matrix --csv Terrier-rice.csv  \
         --output oryza-terrier-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
         --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
@@ -174,7 +177,7 @@ To see the effect of the threshold on the results, you can run the following com
 
 .. code-block:: bash
 
-   terrier-tools threshold-plot --csv oryza-terrier.final.TEs.csv  \
+   terrier-tools threshold-plot --csv Terrier-rice.csv  \
         --output oryza-terrier-threshold-plot.html \
         --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
@@ -193,7 +196,8 @@ Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Homo_sapiens.fasta --output-csv Terrier-human.csv --threshold 0
+   terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Homo_sapiens.fasta \
+      --output-csv Terrier-human.csv --threshold 0
 
 
 Now evaluate the results with the following command:
@@ -204,6 +208,12 @@ Now evaluate the results with the following command:
         --threshold 0.7 \
         --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/I,/Jockey.*=/I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
 
+.. code-block:: text
+
+   Total: 1480
+   Total with ground truth: 1382
+   Number classified: 1102/1382 (79.74%)
+   Correct predictions: 1009/1102 (91.56%)
 
 To generate a confusion matrix, use the following command:
 
@@ -229,7 +239,8 @@ Run inference using Terrier like this:
 
 .. code-block:: bash
 
-   terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Mus_musculus.fasta --output-csv Terrier-mouse.csv --threshold 0
+   terrier --input https://raw.githubusercontent.com/rbturnbull/terrier/refs/heads/main/comparison-test-data/Mus_musculus.fasta \
+      --output-csv Terrier-mouse.csv --threshold 0
 
 
 Now evaluate the results with the following command:
@@ -240,6 +251,12 @@ Now evaluate the results with the following command:
         --threshold 0.7 \
         --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/I,/Jockey.*=/I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
 
+
+.. code-block:: text
+
+   Total with ground truth: 1465
+   Number classified: 1204/1465 (82.18%)
+   Correct predictions: 1129/1204 (93.77%)
 
 To generate a confusion matrix, use the following command:
 
