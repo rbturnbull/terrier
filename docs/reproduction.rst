@@ -46,9 +46,9 @@ That will produce the following output:
 
    Total: 667
    Total with ground truth: 661
-   Number classified: 424/661 (64.15%)
-   Correct predictions: 386/424 (91.04%)
-   
+   Number classified: 440/661 (66.57%)
+   Correct predictions: 404/440 (91.82%)
+
 .. note::
 
    The dataset includes six sequences with the 'Unknown' label. That is why there is a difference between the 'Total' and 'Total with ground truth' values.
@@ -68,8 +68,8 @@ That will produce the following output:
 
    Total: 667
    Total with ground truth: 661
-   Number classified: 539/661 (81.54%)
-   Correct predictions: 474/539 (87.94%)
+   Number classified: 544/661 (82.30%)
+   Correct predictions: 482/544 (88.60%)
 
 To generate a confusion matrix, use the following command:
 
