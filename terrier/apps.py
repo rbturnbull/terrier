@@ -223,7 +223,7 @@ class Terrier(Corgi):
         return results_df
 
     def checkpoint(self, checkpoint:Path=None) -> str:
-        return checkpoint or "https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt"
+        return checkpoint or "https://github.com/rbturnbull/terrier/releases/download/v0.4.0/terrier-0.4.ckpt"
     
     @ta.tool
     def preprocess(
