@@ -75,7 +75,13 @@ class Terrier(Corgi):
             return node_string
 
         classification_probabilities = inference.node_probabilities(results[0], root=self.classification_tree)
-        category_names = [node_lineage_string(node) for node in self.classification_tree.node_list_softmax]
+        if hasattr(self.classification_tree, "node_list_softmax"):
+            category_names = [node_lineage_string(node) for node in self.classification_tree.node_list_softmax]
+        else:
+            # Backwards compatibility for older seqtree files which don't have the node_list_softmax attribute, 
+            # in which case we just use all non-root nodes as categories. 
+            # This is the case for Terrier 0.3 and earlier.
+            category_names = [node_lineage_string(node) for node in self.classification_tree.node_list if not node.is_root]
 
         chunk_details = pd.DataFrame(self.dataloader.chunk_details, columns=["file", "original_id", "description", "chunk"])
         predictions_df = pd.DataFrame(classification_probabilities.numpy(), columns=category_names)
