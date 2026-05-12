@@ -414,14 +414,14 @@ files = [
 
 [[package]]
 name = "bio-corgi"
-version = "0.5.2"
+version = "0.5.3"
 description = "Classifier for ORganelle Genomes Inter alia"
 optional = false
 python-versions = "<3.13,>=3.10"
 groups = ["main"]
 files = [
-    {file = "bio_corgi-0.5.2-py3-none-any.whl", hash = "sha256:752e6ec8447ea0a1dddd9c213a52b0982734d71096510a3a2fea8c6a62476ae3"},
-    {file = "bio_corgi-0.5.2.tar.gz", hash = "sha256:506af119538e583d69b7b0ab2d31fe09c56507ec134200806602f5afb33ba78a"},
+    {file = "bio_corgi-0.5.3-py3-none-any.whl", hash = "sha256:afb9b7074c2afccb3160e74e0a9dfa51800a84e1252ec3536e8b00d37d3d3a1f"},
+    {file = "bio_corgi-0.5.3.tar.gz", hash = "sha256:b51d440b501589afc1b5f36dfd694852be47b5a0d8b05e1876918b87fb0d2237"},
 ]
 
 [package.dependencies]
@@ -442,7 +442,7 @@ PyMySQL = ">=1.0.2"
 seqbank = ">=0.1.3"
 termgraph = ">=0.5.3"
 torch = ">=2.0.0"
-torchapp = ">=0.5.2"
+torchapp = ">=0.5.9"
 
 [[package]]
 name = "biopython"
@@ -1676,6 +1676,21 @@ files = [
 [package.extras]
 docs = ["Sphinx", "furo"]
 test = ["objgraph", "psutil", "setuptools"]
+
+[[package]]
+name = "grokadamw"
+version = "0.1.2"
+description = "GrokAdamW optimizer for PyTorch"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "grokadamw-0.1.2-py3-none-any.whl", hash = "sha256:a7f0b6e3d5f9875d72dcab465004a44837c5656cbae6112cd682157bcee08f1a"},
+    {file = "grokadamw-0.1.2.tar.gz", hash = "sha256:dbd7b983712fe5c2b372dfd69153fa1621803e6c4aa94564b6f2e9eef5a33290"},
+]
+
+[package.dependencies]
+torch = ">=1.0.0"
 
 [[package]]
 name = "h11"
@@ -5872,14 +5887,14 @@ pyyaml = ["pyyaml"]
 
 [[package]]
 name = "torchapp"
-version = "0.5.7"
+version = "0.5.9"
 description = "A wrapper for PyTorch projects to create easy command-line interfaces and manage hyper-parameter tuning."
 optional = false
-python-versions = "<3.13,>=3.10"
+python-versions = "<3.14,>=3.10"
 groups = ["main"]
 files = [
-    {file = "torchapp-0.5.7-py3-none-any.whl", hash = "sha256:94db981582143dc8a76a7d3a20d7d0a6bd8e4a2899de1a71bbcd6e255b2c9cc0"},
-    {file = "torchapp-0.5.7.tar.gz", hash = "sha256:adcb7a82403fefe3c8612d793b2190cf7b9ee79250af1444b2ab76a56cce031f"},
+    {file = "torchapp-0.5.9-py3-none-any.whl", hash = "sha256:f3209a5b13a5309b201797e8ad94f002326b39ffdaefa6276510b0c163294fb7"},
+    {file = "torchapp-0.5.9.tar.gz", hash = "sha256:d13ffb74ef5f9c823ece7d83a9ee9a8b8c141c20e6bd6cc3465855b467bc666c"},
 ]
 
 [package.dependencies]
@@ -5887,7 +5902,8 @@ appdirs = ">=1.4.4"
 cmaes = ">=0.11.1"
 cookiecutter = ">=2.1.1"
 executing = ">=2.0.1"
-lightning = ">=2.3.3"
+grokadamw = ">=0.1.2"
+lightning = ">=2.3.3,<2.6.2 || >2.6.2,<2.6.3 || >2.6.3"
 numpy = ">=1.22.0,<2.0.0"
 optuna = ">=2.10.0"
 pandas = ">=1.3.5"
@@ -6592,4 +6608,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "a3688d619b9d960e0f97f4c2909832a610a98bbadde8e4e62d111fea1b61ba4f"
+content-hash = "787f773ae3b69cf9260675ae60c608dd5271c1576a4747f25f5c8062fa7b3cc9"

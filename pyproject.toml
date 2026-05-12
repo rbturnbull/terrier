@@ -23,10 +23,12 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
+torch = ">=2.6.0"
+lightning = ">=2.6.1,!=2.6.2,!=2.6.3"
 numpy = "<2.0.0"
 pandas = "<=2.2.0"
 h5py = ">=3.8.0"
-bio-corgi = ">=0.5.2"
+bio-corgi = ">=0.5.3"
 pyfastx = ">=1.1.0"
 toml = ">=0.10.2"
 
@@ -57,4 +59,3 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 terrier = "terrier.apps:Terrier.main"
 terrier-tools = "terrier.apps:Terrier.tools"
-
