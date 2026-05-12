@@ -19,6 +19,7 @@ Classifier of Repeats
    :caption: Contents:
 
    quickstart
+   latest
    preprocessing
    training
    reproduction
