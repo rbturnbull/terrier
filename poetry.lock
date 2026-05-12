@@ -414,14 +414,14 @@ files = [
 
 [[package]]
 name = "bio-corgi"
-version = "0.5.3"
+version = "0.5.4"
 description = "Classifier for ORganelle Genomes Inter alia"
 optional = false
 python-versions = "<3.13,>=3.10"
 groups = ["main"]
 files = [
-    {file = "bio_corgi-0.5.3-py3-none-any.whl", hash = "sha256:afb9b7074c2afccb3160e74e0a9dfa51800a84e1252ec3536e8b00d37d3d3a1f"},
-    {file = "bio_corgi-0.5.3.tar.gz", hash = "sha256:b51d440b501589afc1b5f36dfd694852be47b5a0d8b05e1876918b87fb0d2237"},
+    {file = "bio_corgi-0.5.4-py3-none-any.whl", hash = "sha256:b4585cc77bc24a4ce5c07865bbb4efe9c386fb5b967ed5ddc54a919b6986e154"},
+    {file = "bio_corgi-0.5.4.tar.gz", hash = "sha256:45eadaacba9dbdb81af688676af5bb61b5be3eca431964154e6abf87558dd069"},
 ]
 
 [package.dependencies]
@@ -6608,4 +6608,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "787f773ae3b69cf9260675ae60c608dd5271c1576a4747f25f5c8062fa7b3cc9"
+content-hash = "654f30f3da6955c9afa70582f4ec75905c43994da9b8fef334c1f4415457fb7e"

@@ -28,7 +28,7 @@ lightning = ">=2.6.1,!=2.6.2,!=2.6.3"
 numpy = "<2.0.0"
 pandas = "<=2.2.0"
 h5py = ">=3.8.0"
-bio-corgi = ">=0.5.3"
+bio-corgi = ">=0.5.4"
 pyfastx = ">=1.1.0"
 toml = ">=0.10.2"
 
