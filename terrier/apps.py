@@ -234,6 +234,7 @@ class Terrier(Corgi):
         label_smoothing:float=0.0, 
         gamma:float=0.0, 
         partitions:int=5,
+        seed:int=ta.Param(0, help="Seed for deterministic sequence-based partition assignments."),
     ):
         from seqbank import SeqBank
         from .repeatmasker import create_repeatmasker_seqtree
@@ -255,6 +256,7 @@ class Terrier(Corgi):
                 label_smoothing=label_smoothing,
                 gamma=gamma,
                 partitions=partitions,
+                seed=seed,
             )
             seqtree.save(seqtree_path)
             seqtree.render(print=1, count=True)

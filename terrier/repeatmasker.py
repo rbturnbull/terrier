@@ -5,6 +5,7 @@ import toml
 from corgi.seqtree import SeqTree
 from collections import Counter
 import gzip
+import hashlib
 
 
 def open_maybe_gz(file:Path):
@@ -39,7 +40,11 @@ def create_repeatmasker_seqtree(
     label_smoothing:float=0.0, 
     gamma:float=0.0, 
     partitions:int=5,
+    seed:int=0,
 ) -> SeqTree:
+    if partitions < 1:
+        raise ValueError("partitions must be a positive integer")
+
     with open(Path(__file__).parent/"data/repbase-to-repeatmasker.toml", "r") as f:
         mapping = toml.load(f)
 
@@ -53,11 +58,9 @@ def create_repeatmasker_seqtree(
     seqtree = SeqTree(classification_tree)
 
     # Read files
-    count = 0
     for file in fasta_paths:
         with open_maybe_gz(file) as f:
             for record in SeqIO.parse(f, "fasta"):
-                partition = count % partitions
                 accession = record.id
 
                 classification = get_verbatim_classification(file, record)
@@ -97,13 +100,15 @@ def create_repeatmasker_seqtree(
                         )
 
                 node = classification_nodes[classification]
+                payload = f"{seed}:{str(record.seq).upper()}".encode("utf-8")
+                digest = hashlib.sha256(payload).digest()
+                partition = int.from_bytes(digest, "big") % partitions
             
                 try:
                     seqtree.add(accession, node, partition)
                 except Exception as err:
                     print(err)
 
-                count += 1
 
     print("provided,count,mapped,repeat_masker")
     for classification,count in mapped_counter.most_common():

@@ -34,6 +34,14 @@ This will create a SeqBank file called ``Repbase-seqbank.sb`` and a SeqTree file
 
 The SeqTree file will have five cross-validation partitions and a taxonomic tree using the RepeatMasker schema.
 
+Partitions are assigned deterministically using a SHA-256 hash of the seed and the
+uppercase sequence. The default seed is ``0``; use ``--seed`` to choose another
+seed. With the same seed and partition count, reordering files or adding sequences
+does not change existing assignments, and identical sequences share a partition.
+Partition sizes are approximately balanced. Changing the seed or partition count
+changes assignments. This replaces the previous round-robin assignment, so
+regenerating a SeqTree can change partitions compared with earlier versions.
+
 To create a different number of partitions, run the command with the ``--partitions`` flag. For more options see the help:
 
 .. code-block:: bash
