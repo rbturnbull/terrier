@@ -22,13 +22,13 @@ packages = [
 
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.11,<3.15"
 torch = ">=2.6.0"
 lightning = ">=2.6.1,!=2.6.2,!=2.6.3"
 numpy = "<2.0.0"
-pandas = "<=2.2.0"
+pandas = ">=2.2.0"
 h5py = ">=3.8.0"
-bio-corgi = ">=0.5.4"
+bio-corgi = ">=0.5.7"
 pyfastx = ">=1.1.0"
 toml = ">=0.10.2"
 

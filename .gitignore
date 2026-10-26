@@ -188,3 +188,12 @@ comparison-test-data/get-rules.ipynb
 compare.sh
 drosophila.final.TEs.fa.gz
 terrier-0.4
+
+Untitled-1.ipynb
+cluster.ipynb
+example.nc
+images/
+repbase-to-repeatmasker.py
+test_repbase.sh
+validation-0.csv
+x.csv
