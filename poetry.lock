@@ -6514,49 +6514,11 @@ pyyaml = ["pyyaml"]
 
 [[package]]
 name = "torchapp"
-version = "0.5.9"
-description = "A wrapper for PyTorch projects to create easy command-line interfaces and manage hyper-parameter tuning."
-optional = false
-python-versions = "<3.14,>=3.10"
-groups = ["main"]
-markers = "python_version == \"3.11\""
-files = [
-    {file = "torchapp-0.5.9-py3-none-any.whl", hash = "sha256:f3209a5b13a5309b201797e8ad94f002326b39ffdaefa6276510b0c163294fb7"},
-    {file = "torchapp-0.5.9.tar.gz", hash = "sha256:d13ffb74ef5f9c823ece7d83a9ee9a8b8c141c20e6bd6cc3465855b467bc666c"},
-]
-
-[package.dependencies]
-appdirs = ">=1.4.4"
-cmaes = ">=0.11.1"
-cookiecutter = ">=2.1.1"
-executing = ">=2.0.1"
-grokadamw = ">=0.1.2"
-lightning = ">=2.3.3,<2.6.2 || >2.6.2,<2.6.3 || >2.6.3"
-numpy = ">=1.22.0,<2.0.0"
-optuna = ">=2.10.0"
-pandas = ">=1.3.5"
-Pillow = ">=9.0.1"
-pybtex = ">=0.24.0"
-pybtexnbib = ">=0.1.1"
-pyjwt = ">=2.4.0"
-PyYAML = ">=6.0"
-rich = ">=10.16.1"
-scikit-learn = ">=1.0.2"
-scikit-optimize = ">=0.9.0"
-scipy = ">=1.9.1"
-torch = ">=1.12.1"
-torchvision = ">=0.13.0"
-typer = ">=0.4.0"
-wandb = ">=0.12.9"
-
-[[package]]
-name = "torchapp"
 version = "0.5.10"
 description = "A wrapper for PyTorch projects to create easy command-line interfaces and manage hyper-parameter tuning."
 optional = false
 python-versions = "<3.15,>=3.10"
 groups = ["main"]
-markers = "python_version >= \"3.12\""
 files = [
     {file = "torchapp-0.5.10-py3-none-any.whl", hash = "sha256:29e681f1d27c22b7b615efa1e93b6d50ab8cf8c3e749cc2bcc47241ac78339fc"},
     {file = "torchapp-0.5.10.tar.gz", hash = "sha256:f6b4ec75f45fa7d431f4e1e25be291f499f8af92d196afea19a304e17f288a11"},
@@ -7670,4 +7632,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.15"
-content-hash = "2da5c9ed35cfd059cfbebbf58950123e855c25d8a503ed3c4273247d15b57650"
+content-hash = "59cade7074e2368562738c29088f2506e43d3073d90b33c27e75247e030f7bf2"
