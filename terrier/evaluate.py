@@ -8,8 +8,6 @@ from sklearn.metrics import confusion_matrix as sklearn_confusion_matrix
 import plotly.graph_objects as go
 import plotly.express as px
 import numpy as np
-import plotly.io as pio   
-pio.kaleido.scope.mathjax = None
 
 from .defaults import DEFAULT_HEIGHT, DEFAULT_WIDTH
 
