@@ -3,6 +3,7 @@ from pathlib import Path
 import torchapp as ta
 from corgi import Corgi
 from corgi.apps import output_results_bar_chart
+from seqbank import Engine
 
 from .defaults import DEFAULT_HEIGHT, DEFAULT_WIDTH
 
@@ -230,7 +231,7 @@ class Terrier(Corgi):
         self, 
         input:list[str]=ta.Param(..., help="The path to a FASTA file, URL to a FASTA file, multiple FASTA files or a directory of FASTA files (e.g. the RepBase FASTA directory)"),
         seqbank:Path=ta.Param(None, help="The path to save the new SeqBank file."), 
-        engine:str=ta.Param(None, help="The storage engine for a new SeqBank: 'rocksdict' (default), 'lmdb' or 'speedict'. Existing SeqBanks are detected automatically and must match."),
+        engine:Engine=ta.Param(Engine.LMDB, help="The storage engine for the SeqBank. An existing SeqBank must already use this engine."),
         seqtree:Path=ta.Param(None, help="The path to save the new SeqTree file."), 
         label_smoothing:float=0.0, 
         gamma:float=0.0, 
@@ -243,6 +244,11 @@ class Terrier(Corgi):
         assert seqbank or seqtree, "You must provide either a --seqbank or --seqtree output path (usually both)."
 
         fasta_paths = self.find_fasta_paths(input)
+
+        # Filter out any empty FASTA files
+        fasta_paths = [path for path in fasta_paths if path.stat().st_size > 0]
+        if len(fasta_paths) == 0:
+            raise ValueError("No valid FASTA files found in the input paths.")
         
         # Create the seqbank from the FASTA files
         if seqbank:

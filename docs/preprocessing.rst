@@ -34,9 +34,9 @@ This will create a SeqBank file called ``Repbase-seqbank.sb`` and a SeqTree file
 
 The SeqTree file will have five cross-validation partitions and a taxonomic tree using the RepeatMasker schema.
 
-New SeqBanks use the ``rocksdict`` storage engine by default. Use ``--engine lmdb`` or ``--engine speedict`` to choose another one
+SeqBanks use the ``lmdb`` storage engine by default. Use ``--engine rocksdict`` or ``--engine speedict`` to choose another one
 (``speedict`` needs ``seqbank[speedict]`` and Python below 3.13).
-An existing SeqBank keeps its engine, and requesting a different one is an error.
+An existing SeqBank must already use the requested engine, otherwise it is an error.
 
 Partitions are assigned deterministically using a SHA-256 hash of the seed and the
 uppercase sequence. The default seed is ``0``; use ``--seed`` to choose another
