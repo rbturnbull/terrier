@@ -18,7 +18,6 @@ classifiers = [
 dependencies = [
     "torch>=2.6.0",
     "lightning>=2.6.1,!=2.6.2,!=2.6.3",
-    "numpy<2.0.0",
     "pandas>=2.2.0",
     "h5py>=3.8.0",
     "bio-corgi>=0.5.7",
@@ -48,13 +47,15 @@ dev = [
     "pre-commit>=2.15.0",
     "sphinx-copybutton>=0.5.2",
     "black>=21.10b0",
-    "sphinx-click @ git+https://github.com/rbturnbull/sphinx-click.git",
+    "sphinx-click",
 ]
 
-[tool.poetry]
-packages = [
-    { include = "terrier" },
-]
+[tool.uv.sources]
+sphinx-click = { git = "https://github.com/rbturnbull/sphinx-click.git" }
+
+[tool.uv.build-backend]
+module-name = "terrier"
+module-root = ""
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -63,5 +64,5 @@ testpaths = [
 ]
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.13.0,<0.14"]
+build-backend = "uv_build"

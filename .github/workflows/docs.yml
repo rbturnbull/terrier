@@ -24,26 +24,22 @@ jobs:
         python-version: ["3.13"]
     steps:
     - uses: actions/checkout@v7
-    - name: Install poetry
-      run: pipx install poetry
-    - name: Initialise Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v7
+    - name: Install uv and Python ${{ matrix.python-version }}
+      uses: astral-sh/setup-uv@v10.3.2
       with:
         python-version: ${{ matrix.python-version }}
-        cache: poetry
+        enable-cache: true
     - name: Install dependencies for Python ${{ matrix.python-version }}
-      run: |
-        poetry env use "${{ matrix.python-version }}"
-        poetry install
+      run: uv sync --locked
 
     - name: Build Sphinx docs
-      run: poetry run sphinx-build -b html docs gh-pages
+      run: uv run --no-sync sphinx-build -b html docs gh-pages
 
     - name: Run tests and generate coverage report
       run: |
-        poetry run coverage run -m pytest
-        echo "COVERAGE=$(poetry run coverage report --precision 2 | grep TOTAL | tr -s ' ' | cut -f 4 -d " ")" >> $GITHUB_ENV
-        poetry run coverage html --directory gh-pages/coverage
+        uv run --no-sync coverage run -m pytest
+        echo "COVERAGE=$(uv run --no-sync coverage report --precision 2 | grep TOTAL | tr -s ' ' | cut -f 4 -d " ")" >> $GITHUB_ENV
+        uv run --no-sync coverage html --directory gh-pages/coverage
 
     - name: Setup Pages
       uses: actions/configure-pages@v6
