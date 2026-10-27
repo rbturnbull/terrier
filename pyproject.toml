@@ -1,50 +1,61 @@
-[tool.poetry]
+[project]
 name = "bio-terrier"
 version = "0.4.0"
 description = "Transposable Element Repeat Result classifIER"
-authors = ["Robert Turnbull <robert.turnbull@unimelb.edu.au>"]
+authors = [
+    { name = "Robert Turnbull", email = "robert.turnbull@unimelb.edu.au" },
+]
 license = "Apache-2.0"
 readme = "README.rst"
-repository = "https://github.com/rbturnbull/terrier/"
-documentation = "https://rbturnbull.github.io/terrier"
-homepage = "https://github.com/rbturnbull/terrier/"
+requires-python = ">=3.11,<3.15"
 keywords = ["torchapp", "pytorch", "deep learning", "command-line interface"]
 # For classifiers see https://pypi.org/classifiers/
 classifiers = [
-    "License :: OSI Approved :: Apache Software License",
     "Intended Audience :: Science/Research",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-packages = [
-    {include = "terrier"}
+dependencies = [
+    "torch>=2.6.0",
+    "lightning>=2.6.1,!=2.6.2,!=2.6.3",
+    "pandas>=2.2.0",
+    "h5py>=3.8.0",
+    "bio-corgi>=0.5.7",
+    "pyfastx>=1.1.0",
+    "toml>=0.10.2",
 ]
 
+[project.urls]
+Homepage = "https://github.com/rbturnbull/terrier/"
+Repository = "https://github.com/rbturnbull/terrier/"
+Documentation = "https://rbturnbull.github.io/terrier"
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-torch = ">=2.6.0"
-lightning = ">=2.6.1,!=2.6.2,!=2.6.3"
-numpy = "<2.0.0"
-pandas = "<=2.2.0"
-h5py = ">=3.8.0"
-bio-corgi = ">=0.5.4"
-pyfastx = ">=1.1.0"
-toml = ">=0.10.2"
+[project.scripts]
+terrier = "terrier.apps:Terrier.main"
+terrier-tools = "terrier.apps:Terrier.tools"
 
-[tool.poetry.group.dev.dependencies]
-pytest = ">=6.2.5"
-ipykernel = ">=6.6.1"
-coverage = ">=5.5"
-autopep8 = ">=1.5.7"
-Sphinx = ">=4.2.0"
-nbsphinx = ">=0.8.7"
-sphinx-rtd-theme = ">=1.0.0"
-sphinx-autobuild = ">=2021.3.14"
-pre-commit = ">=2.15.0"
-sphinx-copybutton = ">=0.5.2"
-black = ">=21.10b0"
-sphinx-click = {git = "https://github.com/rbturnbull/sphinx-click.git"}
+[dependency-groups]
+dev = [
+    "pytest>=6.2.5",
+    "ipykernel>=6.6.1",
+    "coverage>=5.5",
+    "autopep8>=1.5.7",
+    "Sphinx>=4.2.0",
+    "nbsphinx>=0.8.7",
+    "sphinx-rtd-theme>=1.0.0",
+    "sphinx-autobuild>=2021.3.14",
+    "pre-commit>=2.15.0",
+    "sphinx-copybutton>=0.5.2",
+    "black>=21.10b0",
+    "sphinx-click",
+]
+
+[tool.uv.sources]
+sphinx-click = { git = "https://github.com/rbturnbull/sphinx-click.git" }
+
+[tool.uv.build-backend]
+module-name = "terrier"
+module-root = ""
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -53,9 +64,5 @@ testpaths = [
 ]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-terrier = "terrier.apps:Terrier.main"
-terrier-tools = "terrier.apps:Terrier.tools"
+requires = ["uv_build>=0.13.0,<0.14"]
+build-backend = "uv_build"
