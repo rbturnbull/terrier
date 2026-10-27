@@ -231,6 +231,9 @@ class Terrier(Corgi):
         input:list[str]=ta.Param(..., help="The path to a FASTA file, URL to a FASTA file, multiple FASTA files or a directory of FASTA files (e.g. the RepBase FASTA directory)"),
         seqbank:Path=ta.Param(None, help="The path to save the new SeqBank file."), 
         seqtree:Path=ta.Param(None, help="The path to save the new SeqTree file."), 
+        summary_csv:Path=ta.Param(None, help="Save dataset totals as CSV."),
+        classifications_csv:Path=ta.Param(None, help="Save unique input names, resulting classifications, and counts as CSV."),
+        retained_csv:Path=ta.Param(None, help="Save retained classification counts and percentages as CSV."),
         label_smoothing:float=0.0, 
         gamma:float=0.0, 
         partitions:int=5,
@@ -239,7 +242,7 @@ class Terrier(Corgi):
         from seqbank import SeqBank
         from .repeatmasker import create_repeatmasker_seqtree
 
-        assert seqbank or seqtree, "You must provide either a --seqbank or --seqtree output path (usually both)."
+        assert seqbank or seqtree or summary_csv or classifications_csv or retained_csv, "Provide a --seqbank, --seqtree, or summary CSV output path."
 
         fasta_paths = self.find_fasta_paths(input)
         
@@ -249,16 +252,20 @@ class Terrier(Corgi):
             seqbank.add_files(fasta_paths, format="fasta")
 
         # Create the seqtree
-        if seqtree:
-            seqtree_path = Path(seqtree)
+        if seqtree or summary_csv or classifications_csv or retained_csv:
+            seqtree_path = Path(seqtree) if seqtree else None
             seqtree = create_repeatmasker_seqtree(
                 fasta_paths=fasta_paths,
                 label_smoothing=label_smoothing,
                 gamma=gamma,
                 partitions=partitions,
                 seed=seed,
+                summary_csv=summary_csv,
+                classifications_csv=classifications_csv,
+                retained_csv=retained_csv,
             )
-            seqtree.save(seqtree_path)
+            if seqtree_path:
+                seqtree.save(seqtree_path)
             seqtree.render(print=1, count=True)
 
     @ta.tool

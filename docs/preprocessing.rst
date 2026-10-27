@@ -168,3 +168,33 @@ You can include Repbase with your custom dataset like this:
         terrier-tools preprocess --input $REPBASE_DIR --input custom.fasta --seqbank combined-seqbank.sb --seqtree combined-seqtree.st
 
 
+
+Preprocessing summaries
+-----------------------
+
+Preprocessing prints Rich tables with dataset totals, every input classification,
+and retained classification counts and percentages. The input classification table
+and CSV contain three columns: ``provided`` (unique input label), ``repeat_masker``
+(resulting classification, or ``<UNSUPPORTED>``), and ``count`` (input sequences
+with that label). Labels already in the supported schema retain their names.
+Unsupported and unknown records are excluded from the SeqTree; failed additions
+are counted separately in the dataset summary. The SeqBank contains the input
+sequences.
+
+Counts in the retained table are direct assignments, not totals including child
+classes. Percentages use all successfully retained sequences as the denominator.
+The input classification table includes rejected records, so its counts sum to the
+number of input sequences.
+
+Save any or all tables using these optional arguments:
+
+.. code-block:: bash
+
+    terrier-tools preprocess --input custom.fasta \
+        --seqbank custom-seqbank.sb --seqtree custom-seqtree.st \
+        --summary-csv summary.csv \
+        --classifications-csv classifications.csv \
+        --retained-csv retained.csv
+
+CSV files contain the same columns and rows as the corresponding displayed tables.
+Parent directories are created automatically; existing CSV files are overwritten.

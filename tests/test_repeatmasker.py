@@ -144,3 +144,48 @@ def test_invalid_partition_count():
 
     with pytest.raises(ValueError, match="positive integer"):
         create_repeatmasker_seqtree([], partitions=0)
+
+
+def test_complete_summary_and_csv_exports(tmp_path, capsys):
+    import pandas as pd
+
+    fasta = tmp_path / "custom.fasta"
+    fasta.write_text(
+        ">mapped#LTR\nACGT\n"
+        ">direct#LTR/Gypsy\nACGTAC\n"
+        ">rejected#DNA/UnsupportedTestClass\nACG\n"
+    )
+    summary_csv = tmp_path / "reports" / "summary.csv"
+    classifications_csv = tmp_path / "classifications.csv"
+    retained_csv = tmp_path / "retained.csv"
+    tree = create_repeatmasker_seqtree(
+        [fasta], summary_csv=summary_csv,
+        classifications_csv=classifications_csv, retained_csv=retained_csv,
+    )
+    assert len(tree) == 2
+    summary = pd.read_csv(summary_csv).set_index("metric")["value"]
+    assert summary["Input sequences"] == 3
+    assert summary["Input bases"] == 13
+    assert summary["Retained sequences"] == 2
+    assert summary["Unsupported sequences"] == 1
+    classes = pd.read_csv(classifications_csv).set_index("provided")
+    assert list(classes.reset_index().columns) == ["provided", "repeat_masker", "count"]
+    assert classes.loc["LTR", "repeat_masker"] == "LTR"
+    assert classes.loc["LTR/Gypsy", "repeat_masker"] == "LTR/Gypsy"
+    assert classes.loc["DNA/UnsupportedTestClass", "repeat_masker"] == "<UNSUPPORTED>"
+    assert classes["count"].sum() == 3
+    retained = pd.read_csv(retained_csv)
+    assert retained["count"].sum() == 2
+    assert retained["percent_retained"].sum() == 100
+    output = capsys.readouterr().out
+    assert "Dataset summary" in output
+    assert "Input classifications" in output
+
+
+def test_empty_summary_exports(tmp_path):
+    import pandas as pd
+
+    output = tmp_path / "retained.csv"
+    tree = create_repeatmasker_seqtree([], retained_csv=output)
+    assert len(tree) == 0
+    assert list(pd.read_csv(output).columns) == ["repeat_masker", "count", "percent_retained"]
