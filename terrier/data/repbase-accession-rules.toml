@@ -1,0 +1,40 @@
+# Classifications for individual Repbase accessions.
+#
+# The label-to-classification mapping in repbase-to-repeatmasker.toml cannot fix sequences
+# whose Repbase label is generic or wrong. A rule here is applied to every occurrence of
+# the accession, before the label mapping, and each target must be a classification which
+# appears in that mapping file. Keep a comment with the source for every group of rules.
+
+# Table 5 (DNA transposons) of Kojima et al. 2018, Mobile DNA 9:35. Repbase labels these 'DNA transposon'.
+# hAT
+"MER103" = "DNA/hAT"
+"MER45B" = "DNA/hAT"
+"MER45R" = "DNA/hAT"
+"MER63A" = "DNA/hAT"
+"MER63B" = "DNA/hAT"
+"ZAPHOD" = "DNA/hAT"
+# Mariner/Tc1
+"MER53" = "DNA/TcMar"
+"MER104" = "DNA/TcMar"
+"MER104A" = "DNA/TcMar"
+"MER104B" = "DNA/TcMar"
+"MER104C" = "DNA/TcMar"
+# piggyBac
+"LOOPER" = "DNA/PiggyBac"
+"MER75B" = "DNA/PiggyBac"
+"MER85" = "DNA/PiggyBac"
+
+# Table 3 (non-LTR retrotransposons) of Kojima et al. 2018
+# L2 clade. Repbase labels these CR1.
+"L2" = "LINE/L2"
+"L2B" = "LINE/L2"
+# Crack clade (Dfam classifies the Crack families as LINE/L2). Repbase labels this 'Non-LTR Retrotransposon'.
+"X13_LINE" = "LINE/L2"
+# RTE clade. Repbase labels this 'Non-LTR Retrotransposon'.
+"X3_LINE" = "LINE/RTE"
+# SINE2/tRNA. Repbase gives these two labels, SINE2/tRNA and SINE3/5S.
+"LmeSINE1b" = "SINE/tRNA"
+"LmeSINE1c" = "SINE/tRNA"
+
+# Table 4 (LTR retrotransposons) of Kojima et al. 2018. ERV1 group. Repbase labels this 'Long terminal repeat'.
+"MER93" = "LTR/ERV"

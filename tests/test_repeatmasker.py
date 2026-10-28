@@ -1,6 +1,6 @@
 from pathlib import Path
 from Bio import SeqIO
-from terrier.repeatmasker import get_verbatim_classification, create_repeatmasker_seqtree
+from terrier.repeatmasker import get_verbatim_classification, create_repeatmasker_seqtree, choose_classification, load_accession_rules
 
 
 TEST_DATA_DIR = Path(__file__).parent / "test-data"
@@ -79,7 +79,7 @@ def test_create_repeatmasker_seqtree_repbase_simple():
         ├── LINE
         │   └── R1
         ├── SINE
-        └── Satellite
+        └── Simple_repeat
         """
     )    
 
@@ -101,7 +101,7 @@ def test_create_repeatmasker_seqtree_custom():
         ├── LINE
         │   └── R1
         ├── SINE
-        ├── Satellite
+        ├── Simple_repeat
         └── LTR
             └── Caulimovirus
         """
@@ -189,3 +189,75 @@ def test_empty_summary_exports(tmp_path):
     tree = create_repeatmasker_seqtree([], retained_csv=output)
     assert len(tree) == 0
     assert list(pd.read_csv(output).columns) == ["repeat_masker", "count", "percent_retained"]
+
+
+def test_choose_classification():
+    assert choose_classification(["DNA"]) == "DNA"
+    assert choose_classification(["DNA", "DNA/hAT"]) == "DNA/hAT"
+    assert choose_classification(["DNA/hAT", "DNA"]) == "DNA/hAT"
+    assert choose_classification(["DNA", "DNA/hAT", "DNA/hAT"]) == "DNA/hAT"
+    assert choose_classification(["LTR", "DNA/hAT"]) == "DNA/hAT"  # different lineages
+    # A generic label does not outvote a specific one from another lineage
+    assert choose_classification(["LINE", "LINE", "LINE", "LTR/ERV"]) == "LTR/ERV"
+    assert choose_classification(["DNA", "DNA", "RC/Helitron"]) == "RC/Helitron"
+    # Conflicts use the most common label, then alphabetical order
+    assert choose_classification(["DNA/hAT", "DNA/TcMar", "DNA/TcMar"]) == "DNA/TcMar"
+    assert choose_classification(["DNA/TcMar", "DNA/hAT"]) == "DNA/TcMar"
+
+
+def test_most_specific_label_wins_for_repeated_accession(tmp_path):
+    # Repbase headers are 'accession<TAB>classification<TAB>species'
+    first = tmp_path / "first.fasta"
+    second = tmp_path / "second.fasta"
+    first.write_text(">same\tDNA transposon\tHomo sapiens\nACGTACGT\n>other\tDNA transposon\tHomo sapiens\nAACCGGTT\n")
+    second.write_text(">same\thAT\tHomo sapiens\nACGTACGT\n")
+    for paths in ([first, second], [second, first]):
+        seqtree = create_repeatmasker_seqtree(paths, seed=1)
+        assert seqtree["same"].node.name == "hAT"
+        assert seqtree["other"].node.name == "DNA"
+
+
+def test_conflicting_labels_do_not_depend_on_file_order(tmp_path):
+    first = tmp_path / "first.fasta"
+    second = tmp_path / "second.fasta"
+    first.write_text(">same\thAT\tHomo sapiens\nACGTACGT\n")
+    second.write_text(">same\tMariner/Tc1\tHomo sapiens\nACGTACGT\n")
+    results = []
+    for paths in ([first, second], [second, first]):
+        seqtree = create_repeatmasker_seqtree(paths, seed=1)
+        assert len(seqtree) == 1
+        results.append(seqtree["same"].node.name)
+    assert results[0] == results[1]
+
+
+def test_repeatmasker_family_names_are_collapsed(tmp_path):
+    fasta = tmp_path / "families.fasta"
+    fasta.write_text(
+        ">a#LINE/I-Jockey\nACGTAC\n>b#LINE/Jockey\nACGTAG\n>c#LINE/I\nACGTAT\n>d#LINE/Jockey-I\nACGTCC\n"
+        ">e#DNA/hAT-Ac\nACGTGG\n>f#LINE/R2-Hero\nACGTTT\n"
+    )
+    seqtree = create_repeatmasker_seqtree([fasta])
+    for accession in ["a#LINE/I-Jockey", "b#LINE/Jockey", "c#LINE/I", "d#LINE/Jockey-I"]:
+        assert seqtree[accession].node.name == "Jockey-I"
+    assert seqtree["e#DNA/hAT-Ac"].node.name == "hAT"
+    assert seqtree["f#LINE/R2-Hero"].node.name == "R2"
+
+
+def test_accession_rules_override_the_label(tmp_path):
+    first = tmp_path / "first.fasta"
+    second = tmp_path / "second.fasta"
+    first.write_text(">ruled\tDNA transposon\tHomo sapiens\nACGTACGT\n>other\tDNA transposon\tHomo sapiens\nAACCGGTT\n")
+    second.write_text(">ruled\tMariner/Tc1\tHomo sapiens\nACGTACGT\n")
+    for paths in ([first, second], [second, first]):
+        seqtree = create_repeatmasker_seqtree(paths, accession_rules={"ruled": "DNA/hAT"})
+        assert seqtree["ruled"].node.name == "hAT"  # even though one file says Mariner/Tc1
+        assert seqtree["other"].node.name == "DNA"
+
+
+def test_accession_rules_in_the_package_are_valid():
+    import toml
+    mapping = toml.load(Path(__file__).parent.parent / "terrier/data/repbase-to-repeatmasker.toml")
+    rules = load_accession_rules(mapping)
+    assert len(rules) > 0
+    assert set(rules.values()) <= set(mapping.values())
+    assert rules["MER103"] == "DNA/hAT"

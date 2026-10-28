@@ -37,7 +37,7 @@ Now evaluate the results with the following command:
 
    terrier-tools evaluate --csv Terrier-fruit-fly.csv  \
         --threshold 0.7 \
-        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC 
+        --map /I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC 
         
 That will produce the following output:
 
@@ -59,7 +59,7 @@ To get the accuracy results just for the 'Order' level and ignoring the 'Superfa
    terrier-tools evaluate --csv Terrier-fruit-fly.csv  \
         --threshold 0.7 \
         --no-superfamily \
-        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
@@ -77,7 +77,7 @@ To generate a confusion matrix, use the following command:
    terrier-tools confusion-matrix --csv Terrier-fruit-fly.csv  \
         --output drosophila-terrier-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
-        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -94,7 +94,7 @@ To see the effect of the threshold on the results, you can run the following com
 
    terrier-tools threshold-plot --csv Terrier-fruit-fly.csv  \
         --output drosophila-terrier-threshold-plot.html \
-        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -125,7 +125,7 @@ Now evaluate the results with the following command:
 
    terrier-tools evaluate --csv Terrier-rice.csv  \
         --threshold 0.7 \
-        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
@@ -143,7 +143,7 @@ To get the accuracy results just for the 'Order' level and ignoring the 'Superfa
    terrier-tools evaluate --csv Terrier-rice.csv  \
         --threshold 0.7 \
         --no-superfamily \
-        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will produce the following output:
 
@@ -162,7 +162,7 @@ To generate a confusion matrix, use the following command:
    terrier-tools confusion-matrix --csv Terrier-rice.csv  \
         --output oryza-terrier-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
-        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -179,7 +179,7 @@ To see the effect of the threshold on the results, you can run the following com
 
    terrier-tools threshold-plot --csv Terrier-rice.csv  \
         --output oryza-terrier-threshold-plot.html \
-        --map /I-Jockey=/I,/Jockey=/I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
+        --map /I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,TcMar-Pogo=TcMar,TcMar-Tc1=TcMar,CMC-Transib=CMC,R1-LOA=R1,hAT-hobo=hAT,hAT-Tip100=hAT,CMC-EnSpm=CMC
 
 That will generate an HTML file like this:
 
@@ -206,7 +206,7 @@ Now evaluate the results with the following command:
 
    terrier-tools evaluate --csv Terrier-human.csv  \
         --threshold 0.7 \
-        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/I,/Jockey.*=/I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
+        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
 
 .. code-block:: text
 
@@ -222,7 +222,7 @@ To generate a confusion matrix, use the following command:
    terrier-tools confusion-matrix --csv Terrier-human.csv  \
         --output Terrier-human-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
-        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/I,/Jockey.*=/I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
+        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
 
 That will generate an HTML file like this:
 
@@ -249,7 +249,7 @@ Now evaluate the results with the following command:
 
    terrier-tools evaluate --csv Terrier-mouse.csv  \
         --threshold 0.7 \
-        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/I,/Jockey.*=/I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
+        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
 
 
 .. code-block:: text
@@ -265,7 +265,7 @@ To generate a confusion matrix, use the following command:
    terrier-tools confusion-matrix --csv Terrier-mouse.csv  \
         --output Terrier-mouse-confusion-matrix-threshold-0.7.html \
         --threshold 0.7 \
-        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/I,/Jockey.*=/I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
+        --map "/Pao=/Bel-Pao,TIR=DNA,DNA/CMC-.*=DNA/CACTA,DNA/CMC=DNA/CACTA,TcMar-.*=Tc1,Tc1-.*=Tc1,hAT-.*=hAT,LTR/ERV.*=LTR/ERV,L1-.*=L1,PIF-Harbinger=Harbinger,Crypton-.*=Crypton,RTE-.*=RTE,Retroposon/L1=LINE/L1,Satellite/.*=Satellite,^tRNA=SINE/tRNA,SINE/tRNA-.*=SINE/tRNA,TcMar=Tc1,SINE/5S-.*=SINE/5S,SINE/Alu=SINE/7SL,SINE/B2=SINE/tRNA,SINE/B4=SINE/tRNA,SINE/MIR=SINE/tRNA,SINE/ID=SINE/tRNA,/I-Jockey=/Jockey-I,/Jockey.*=/Jockey-I,/I$=/Jockey-I,/MULE-.*=/MULE,LINE/R1-.*=LINE/R1"
 
 That will generate an HTML file like this:
 
