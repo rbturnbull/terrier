@@ -130,8 +130,7 @@ That will output a tree with the number of sequences like this:
     │   ├── 5S (50)
     │   └── U (20)
     ├── PLE (1713)
-    ├── Simple_repeat (139)
-    └── Other (11)
+    └── Simple_repeat (139)
 
 You can also display the SeqTree in a Sunburst chart by running:
 
