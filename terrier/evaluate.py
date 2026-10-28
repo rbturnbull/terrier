@@ -224,7 +224,9 @@ def confusion_matrix_fig(confusion_matrix:pd.DataFrame, width:int=DEFAULT_WIDTH,
     return fig
 
 
-def comparison_plot(files: list[Path], superfamily:bool=False, threshold:float=0.0):
+def comparison_plot(files: list[Path], superfamily:bool=False, threshold:float|None=0.0):
+    threshold = threshold or 0.0  # No threshold is the same as a threshold of zero
+
     def read_csv(csv_file: Path):
         df = pd.read_csv(csv_file)
         df["original_classification"] = df["original_classification"].str.replace("?","")

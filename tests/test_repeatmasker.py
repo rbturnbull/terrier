@@ -1,4 +1,6 @@
 from pathlib import Path
+import pandas as pd
+import pytest
 from Bio import SeqIO
 from terrier.repeatmasker import get_verbatim_classification, create_repeatmasker_seqtree, choose_classification, load_accession_rules
 
@@ -261,3 +263,82 @@ def test_accession_rules_in_the_package_are_valid():
     assert len(rules) > 0
     assert set(rules.values()) <= set(mapping.values())
     assert rules["MER103"] == "DNA/hAT"
+
+
+def test_gzipped_fasta_files_are_read():
+    plain = create_repeatmasker_seqtree([TEST_DATA_DIR / "custom.fna"])
+    zipped = create_repeatmasker_seqtree([TEST_DATA_DIR / "custom.fna.gz"])
+    assert set(zipped.keys()) == set(plain.keys())
+    assert len(zipped) > 0
+
+
+def test_accession_rules_must_use_classifications_from_the_mapping():
+    with pytest.raises(ValueError, match="not in the mapping"):
+        load_accession_rules({"hAT": "DNA/hAT"})
+
+
+def test_partitions_must_be_positive():
+    with pytest.raises(ValueError, match="positive"):
+        create_repeatmasker_seqtree([TEST_DATA_DIR / "repbase.ref"], partitions=0)
+
+
+def test_unknown_and_unsupported_labels_are_not_added(tmp_path):
+    fasta = tmp_path / "labels.fasta"
+    fasta.write_text(">a#Unknown\nACGT\n>b#Not a real class\nACGT\n>c#DNA/hAT\nACGT\n")
+    summary_csv = tmp_path / "summary.csv"
+    seqtree = create_repeatmasker_seqtree([fasta], summary_csv=summary_csv)
+    assert list(seqtree.keys()) == ["c#DNA/hAT"]
+
+    summary = pd.read_csv(summary_csv).set_index("metric")["value"]
+    assert summary["Unknown sequences"] == 1
+    assert summary["Unsupported sequences"] == 1
+    assert summary["Retained sequences"] == 1
+
+
+def test_summary_describes_how_labels_were_resolved(tmp_path):
+    first = tmp_path / "first.fasta"
+    second = tmp_path / "second.fasta"
+    # Repbase headers are 'accession<TAB>classification<TAB>species'
+    first.write_text(
+        ">a\tDNA transposon\tx\nACGT\n"   # generic label which is replaced by a specific one
+        ">b\tDNA transposon\tx\nACGA\n"   # classified by an accession rule
+        ">c\tNot a real class\tx\nACGC\n"  # unsupported
+        ">d\tUnknown\tx\nACGG\n"          # unknown
+        ">e\thAT\tx\nACGTT\n"             # conflicts with the label in the second file
+    )
+    second.write_text(">a\thAT\tx\nACGT\n>e\tMariner/Tc1\tx\nACGTT\n")
+    summary_csv = tmp_path / "summary.csv"
+    classifications_csv = tmp_path / "classifications.csv"
+    retained_csv = tmp_path / "retained.csv"
+
+    seqtree = create_repeatmasker_seqtree(
+        [first, second],
+        accession_rules={"b": "DNA/Academ"},
+        summary_csv=summary_csv,
+        classifications_csv=classifications_csv,
+        retained_csv=retained_csv,
+    )
+
+    assert sorted(seqtree.keys()) == ["a", "b", "e"]
+    assert seqtree["a"].node.name == "hAT"
+    assert seqtree["b"].node.name == "Academ"
+    assert seqtree["e"].node.name == "TcMar"  # tie between lineages is broken alphabetically
+
+    summary = pd.read_csv(summary_csv).set_index("metric")["value"]
+    assert summary["Input files"] == 2
+    assert summary["Input sequences"] == 7
+    assert summary["Accession rules applied"] == 1
+    assert summary["Unsupported sequences"] == 1
+    assert summary["Unknown sequences"] == 1
+    assert summary["Generic labels superseded"] == 1
+    assert summary["Conflicting labels dropped"] == 1
+    assert summary["Retained sequences"] == 3
+    assert summary["Retained classifications"] == 3
+
+    classifications = pd.read_csv(classifications_csv).set_index("provided")
+    assert classifications.loc["hAT", "repeat_masker"] == "DNA/hAT"
+    assert classifications.loc["Not a real class", "repeat_masker"] == "<UNSUPPORTED>"
+
+    retained = pd.read_csv(retained_csv).set_index("repeat_masker")
+    assert set(retained.index) == {"DNA/hAT", "DNA/Academ", "DNA/TcMar"}
+    assert retained["percent_retained"].sum() == pytest.approx(100.0, abs=0.05)  # each is rounded
