@@ -1,4 +1,5 @@
 from pathlib import Path
+import shutil
 import pandas as pd
 import pytest
 import torch
@@ -264,6 +265,7 @@ def test_output_results_fasta_unknown_only(inference_app, tmp_path):
     assert "terrier classification = " in records["r2#LTR/Gypsy"].description
 
 
+@pytest.mark.skipif(shutil.which("dot") is None, reason="Graphviz is needed to draw the probability images")
 def test_output_results_images(inference_app, tmp_path):
     image_dir = tmp_path / "images"
     inference_app.output_results(make_results(inference_app), **{**NO_OUTPUT, "image_dir": image_dir})
