@@ -23,6 +23,7 @@ dependencies = [
     "bio-corgi>=0.5.8",
     "pyfastx>=1.1.0",
     "toml>=0.10.2",
+    "seqbank>=0.4.1",
 ]
 
 [project.urls]

@@ -318,7 +318,7 @@ wheels = [
 
 [[package]]
 name = "bio-corgi"
-version = "0.5.8"
+version = "0.5.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "appdirs" },
@@ -335,14 +335,14 @@ dependencies = [
     { name = "polytorch" },
     { name = "pyarrow" },
     { name = "pymysql" },
-    { name = "seqbank" },
+    { name = "seqbank", extra = ["rocksdict"] },
     { name = "termgraph" },
     { name = "torch" },
     { name = "torchapp" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e0/ee/dd2c6625726d44d6ef85fe44cd4445a094deb2a2a4ec0cda24d840572e75/bio_corgi-0.5.8.tar.gz", hash = "sha256:2c8c4ae560b688eeb22efe62e46c47dcf9b049824b0c28b62dda0434494aeda4", size = 32336, upload-time = "2026-10-28T02:42:43.37Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9b/c9/e652b7ce6d417bfe8a76ea01a00f0e74e803dac965091b1f7f67e49dbb57/bio_corgi-0.5.10.tar.gz", hash = "sha256:873ebbb4d2e48c871a03cf9929122c7d768bcb7b7c37e4e747f62682f27b682f", size = 32355, upload-time = "2026-11-05T02:27:20.387Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4f/1e/ce380123c3b2d2fad67ab3f616075c85b6a0dd77843f5e0865eefd828a9d/bio_corgi-0.5.8-py3-none-any.whl", hash = "sha256:12dcccd377568a3ae7682fac0c9b98fdb443f215a69ca1bdc7446f9e317ad512", size = 34915, upload-time = "2026-10-28T02:42:44.71Z" },
+    { url = "https://files.pythonhosted.org/packages/6e/8a/1c606a94ea595855c179b8d6cb7462caab6a5bb0600eba103cfd4b3303a6/bio_corgi-0.5.10-py3-none-any.whl", hash = "sha256:09ce840df49396139e966f55da51e099e18fd9375d0931f652851c92f9c5af99", size = 34953, upload-time = "2026-11-05T02:27:19.368Z" },
 ]
 
 [[package]]
@@ -355,6 +355,7 @@ dependencies = [
     { name = "lightning" },
     { name = "pandas" },
     { name = "pyfastx" },
+    { name = "seqbank" },
     { name = "toml" },
     { name = "torch" },
 ]
@@ -384,6 +385,7 @@ requires-dist = [
     { name = "lightning", specifier = ">=2.6.1,!=2.6.2,!=2.6.3" },
     { name = "pandas", specifier = ">=2.2.0" },
     { name = "pyfastx", specifier = ">=1.1.0" },
+    { name = "seqbank", specifier = ">=0.4.1" },
     { name = "toml", specifier = ">=0.10.2" },
     { name = "torch", specifier = ">=2.6.0" },
 ]
@@ -3701,7 +3703,7 @@ wheels = [
 
 [[package]]
 name = "seqbank"
-version = "0.2.0"
+version = "0.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -3716,12 +3718,16 @@ dependencies = [
     { name = "pyfastx" },
     { name = "requests" },
     { name = "rich" },
-    { name = "rocksdict" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3f/2a/15da8e1170f0c3696e3923a16ad305af009ac81dd5b7959b7d672da9da5c/seqbank-0.2.0.tar.gz", hash = "sha256:09432813684cf70e7d9e7492fefadb80278d02409d1b65800772e98f6890a3e4", size = 22348, upload-time = "2026-10-26T04:00:59.535Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/88/e4/87cf09e93d9741c3425c6ab379390f70ecffaa3169871bbed7b99da24a03/seqbank-0.4.1.tar.gz", hash = "sha256:358c14098c5e72472f50d78b13dde3ab45857c9fd736da16706e58dc2d206179", size = 289861, upload-time = "2026-11-05T00:55:54.875Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/68/1a/59bc0c40c7b94e09961c00b9aaef68ac7ec5e0050de640061cc3c91170a4/seqbank-0.2.0-py3-none-any.whl", hash = "sha256:e9f2e3608dbc3bae1ff99e71acf59adee94ea5a55d50ffe1dd33d77a8b866421", size = 22079, upload-time = "2026-10-26T04:01:00.87Z" },
+    { url = "https://files.pythonhosted.org/packages/57/90/2f70661c16d002abf26433f8fdcbc348f238c3d1cc9ea2e6ebad7a62e00a/seqbank-0.4.1-py3-none-any.whl", hash = "sha256:899d73012689098ded5efec79bc949b4d8ad50e4618268a31632e7116a5dc722", size = 27309, upload-time = "2026-11-05T00:55:53.629Z" },
+]
+
+[package.optional-dependencies]
+rocksdict = [
+    { name = "rocksdict" },
 ]
 
 [[package]]
