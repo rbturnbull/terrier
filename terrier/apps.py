@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
+from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 import torchapp as ta
 from corgi import Corgi
 from corgi.apps import output_results_bar_chart
@@ -14,6 +16,70 @@ console = Console()
 if TYPE_CHECKING:
     import pandas as pd
     from torchmetrics import Metric
+
+
+@dataclass(frozen=True)
+class CheckpointVersion:
+    """ A released version of the Terrier model weights. """
+    version: str
+    url: str
+    description: str
+    aliases: tuple[str, ...] = ()
+
+
+# Newest first. The first entry is used for 'latest'.
+CHECKPOINT_VERSIONS = (
+    # TODO add version 0.5 when it is released
+    CheckpointVersion(
+        version="0.4",
+        url="https://github.com/rbturnbull/terrier/releases/download/v0.4.0/terrier-0.4.ckpt",
+        description="trained on RepBase31.04",
+    ),
+    CheckpointVersion(
+        # The model weights did not change between versions 0.2 and 0.3
+        version="0.2",
+        url="https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt",
+        description="trained on RepBase29.10. Used in the publication in Briefings in Bioinformatics (2025)",
+        aliases=("0.3", "bib"),
+    ),
+)
+LATEST_CHECKPOINT = "latest"
+
+
+def checkpoint_names() -> list[str]:
+    """ All the names that can be given to the --checkpoint option. """
+    names = [LATEST_CHECKPOINT]
+    for version in CHECKPOINT_VERSIONS:
+        names += [version.version, *version.aliases]
+    return names
+
+
+def resolve_checkpoint_version(name:str) -> CheckpointVersion|None:
+    """ The checkpoint version for a version number or alias, or None if the name is not known. """
+    if name == LATEST_CHECKPOINT:
+        return CHECKPOINT_VERSIONS[0]
+    for version in CHECKPOINT_VERSIONS:
+        if name == version.version or name in version.aliases:
+            return version
+    return None
+
+
+def is_url(location:str) -> bool:
+    return urlparse(str(location)).scheme in ("http", "https")
+
+
+def checkpoint_help() -> str:
+    versions = [f"'{LATEST_CHECKPOINT}' (v{CHECKPOINT_VERSIONS[0].version})"]
+    for version in CHECKPOINT_VERSIONS:
+        names = " / ".join(f"'{name}'" for name in (version.version, *version.aliases))
+        versions.append(f"{names}: {version.description}")
+    return (
+        "The model weights to use. Give a released version, a path to a local checkpoint file or a URL. "
+        "Released versions are " + "; ".join(versions)
+    )
+
+
+CHECKPOINT_HELP = checkpoint_help()
 
 
 def get_original_classification(original_id:str) -> str:
@@ -270,23 +336,30 @@ class Terrier(Corgi):
 
         return results_df
 
-    def checkpoint(self, checkpoint:str="latest") -> str:
-        if Path(checkpoint).exists():
-            return str(checkpoint)
+    @ta.method
+    def checkpoint(
+        self,
+        checkpoint:str=ta.Param(
+            default="latest",
+            help=CHECKPOINT_HELP,
+            metavar="VERSION|PATH|URL",
+        ),
+    ) -> str:
+        """ Returns the location of the model checkpoint for a named version, a local path or a URL. """
+        version = resolve_checkpoint_version(str(checkpoint))
+        if version:
+            console.print(f"Using Terrier checkpoint v{version.version}: {version.description}", style="dim", soft_wrap=True)
+            return version.url
 
-        if checkpoint == "latest":
-            # TODO Change to version 0.5
-            return "https://github.com/rbturnbull/terrier/releases/download/v0.4.0/terrier-0.4.ckpt"
-        elif checkpoint == "0.4":
-            # Trained with RepBase31.04
-            return "https://github.com/rbturnbull/terrier/releases/download/v0.4.0/terrier-0.4.ckpt"
-        elif checkpoint == "0.3" or checkpoint == "0.2" or checkpoint == "bib":
-            # The model weights did not change between versions 0.2 and 0.3, so we can use the same checkpoint for both.
-            # Trained with RepBase29.10 
-            # Version of Terrier for the publication in Briefings in Bioinformatics (2025)
-            return "https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt"
+        if is_url(checkpoint) or Path(checkpoint).exists():
+            console.print(f"Using Terrier checkpoint: {checkpoint}", style="dim", soft_wrap=True)
+            return checkpoint
 
-        raise ValueError(f"Unknown checkpoint: {checkpoint}. Valid checkpoint are 'latest', '0.4', '0.3', '0.2', or 'bib'. Or provide a path to a local checkpoint file.")
+        raise ValueError(
+            f"Unknown checkpoint: '{checkpoint}'. "
+            f"Use one of {', '.join(repr(name) for name in checkpoint_names())}, "
+            "or give the path or URL of a checkpoint file."
+        )
     
     @ta.tool
     def preprocess(

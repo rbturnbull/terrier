@@ -7,7 +7,7 @@ from Bio import SeqIO
 from hierarchicalsoftmax import SoftmaxNode
 from typer.testing import CliRunner
 
-from terrier.apps import Terrier
+from terrier.apps import Terrier, CHECKPOINT_VERSIONS, checkpoint_names, resolve_checkpoint_version
 from terrier.repeatmasker import create_repeatmasker_seqtree
 from terrier.defaults import DEFAULT_HEIGHT, DEFAULT_WIDTH
 
@@ -93,11 +93,67 @@ def test_simple_attributes():
     app = Terrier()
     assert app.package_name() == "bio-terrier"
     assert app.monitor() == "accuracy_repeatmasker_subtype"
-    assert app.checkpoint().endswith("terrier-0.4.ckpt")
-    assert app.checkpoint(Path("custom.ckpt")) == Path("custom.ckpt")
     bibtex = app.get_bibtex_files()
     assert bibtex[-1].name == "terrier.bib"
     assert bibtex[-1].exists()
+
+
+def test_checkpoint_latest_is_the_default(capsys):
+    app = Terrier()
+    assert app.checkpoint() == CHECKPOINT_VERSIONS[0].url
+    assert app.checkpoint(checkpoint="latest") == CHECKPOINT_VERSIONS[0].url
+    assert f"v{CHECKPOINT_VERSIONS[0].version}" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "name, filename",
+    [
+        ("0.4", "terrier-0.4.ckpt"),
+        ("0.3", "terrier-0.2.0.ckpt"),
+        ("0.2", "terrier-0.2.0.ckpt"),
+        ("bib", "terrier-0.2.0.ckpt"),
+    ],
+)
+def test_checkpoint_versions(name, filename, capsys):
+    url = Terrier().checkpoint(checkpoint=name)
+    assert url.startswith("https://github.com/rbturnbull/terrier/releases/download/")
+    assert url.endswith(filename)
+    assert resolve_checkpoint_version(name).description in capsys.readouterr().out
+
+
+def test_checkpoint_local_path(tmp_path, capsys):
+    path = tmp_path / "custom.ckpt"
+    path.write_bytes(b"")
+    assert Terrier().checkpoint(checkpoint=path) == path
+    assert "custom.ckpt" in capsys.readouterr().out
+
+
+def test_checkpoint_url():
+    url = "https://example.com/custom.ckpt"
+    assert Terrier().checkpoint(checkpoint=url) == url
+
+
+@pytest.mark.parametrize("name", ["0.9", "missing.ckpt", "ftp://example.com/custom.ckpt"])
+def test_checkpoint_unknown(name):
+    with pytest.raises(ValueError, match="Unknown checkpoint"):
+        Terrier().checkpoint(checkpoint=name)
+
+
+def test_checkpoint_names_are_unique():
+    names = checkpoint_names()
+    assert names[0] == "latest"
+    assert len(names) == len(set(names))
+    assert {"0.2", "0.3", "0.4", "bib"} <= set(names)
+    assert resolve_checkpoint_version("unknown") is None
+
+
+def test_checkpoint_help_lists_versions():
+    result = CliRunner().invoke(Terrier().main_app, ["--help"], env={"COLUMNS": "1000"})
+    assert result.exit_code == 0
+    assert "VERSION|PATH|URL" in result.stdout
+    for name in checkpoint_names():
+        assert f"'{name}'" in result.stdout
+    assert "Briefings in Bioinformatics" in result.stdout
 
 
 def test_metrics(classification_tree):
