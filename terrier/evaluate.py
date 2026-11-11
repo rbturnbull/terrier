@@ -90,7 +90,10 @@ def evaluate_results(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", 
     print(f"Total: {total}")
 
     # Remove ignored classes
-    data = data.fillna('')
+    # Missing probabilities are kept as NaN, e.g. for sequences that were too short to be classified
+    text_columns = data.select_dtypes(exclude="number").columns
+    data = data.copy()
+    data[text_columns] = data[text_columns].fillna('')
     data = data[~data['original_classification'].isin(ignore)].copy()
 
     # Filter ground truth
@@ -103,8 +106,13 @@ def evaluate_results(data:pd.DataFrame, superfamily:bool=True, map:str|dict="", 
         filtered_columns = [col for col in data.columns if col not in exclude_columns and '/' not in col]
         print(f"Filtered columns: {filtered_columns}")
         if filtered_columns:
-            data["prediction"] = data[filtered_columns].idxmax(axis=1)
-            data["probability"] = data[filtered_columns].max(axis=1)
+            # Sequences without any probabilities (e.g. too short to be classified) have no prediction
+            scores = data[filtered_columns]
+            has_scores = scores.notna().any(axis=1)
+            data["prediction"] = ""
+            data["probability"] = np.nan
+            data.loc[has_scores, "prediction"] = scores[has_scores].idxmax(axis=1)
+            data.loc[has_scores, "probability"] = scores[has_scores].max(axis=1)
         else:
             data["prediction"] = data["prediction"].str.split("/").str[0]
 

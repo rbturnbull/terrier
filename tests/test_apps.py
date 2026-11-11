@@ -41,8 +41,9 @@ NO_OUTPUT = dict(
 class FakeDataLoader:
     """Stands in for the inference dataloader, which splits sequences into chunks."""
 
-    def __init__(self, files, chunk_ids):
+    def __init__(self, files, chunk_ids, min_length=0):
         self.files = files
+        self.min_length = min_length
         self.chunk_details = [(str(files[0]), original_id, description, 0) for original_id, description in chunk_ids]
 
     def parse(self, file):
@@ -220,6 +221,79 @@ def test_output_results_csv_files(inference_app, tmp_path):
     assert {"SINE", "Simple_repeat"} <= set(tips.columns)
     assert not {"DNA", "LINE", "LTR"} & set(tips.columns)
     assert len(tips) == 3
+
+
+@pytest.fixture
+def short_sequence_app(classification_tree, tmp_path) -> Terrier:
+    """An app where r2 is shorter than the minimum length so it is absent from the results."""
+    fasta = tmp_path / "short.fasta"
+    fasta.write_text(">r1#LTR/Gypsy first\nACGTACGT\n>r2#DNA/hAT second\nACGT\n>r3 third\nACGTACGT\n")
+    app = Terrier()
+    app.classification_tree = classification_tree
+    app.dataloader = FakeDataLoader(
+        [fasta],
+        [("r1#LTR/Gypsy", "r1#LTR/Gypsy first"), ("r3", "r3 third")],
+        min_length=5,
+    )
+    return app
+
+
+def test_output_results_csv_includes_sequences_below_the_minimum_length(short_sequence_app, tmp_path):
+    csv_path = tmp_path / "results.csv"
+    tips_path = tmp_path / "tips.csv"
+    df = short_sequence_app.output_results(
+        make_results(short_sequence_app), **{**NO_OUTPUT, "output_csv": csv_path, "output_tips_csv": tips_path}
+    )
+    # The returned results only have the sequences that were classified
+    assert list(df["accession"]) == ["r1", "r3"]
+
+    # but the CSV files have a row for every sequence in the original order
+    for path in [csv_path, tips_path]:
+        full = pd.read_csv(path, keep_default_na=False, na_values=[""])
+        assert list(full["accession"]) == ["r1", "r2", "r3"]
+        assert list(full["original_classification"]) == ["LTR/Gypsy", "DNA/hAT", "null"]
+
+        short = full.loc[1]
+        assert short["prediction"] == "Unknown"
+        assert short["original_id"] == "r2#DNA/hAT"
+        assert short["description"] == "r2#DNA/hAT second"
+        assert pd.isna(short["probability"])
+        assert full.drop(columns=["file", "prediction", "probability", "original_id", "original_classification", "description", "accession"]).loc[1].isna().all()
+        assert full.loc[[0, 2], "probability"].notna().all()
+    assert list(pd.read_csv(csv_path).columns) == list(df.columns)
+
+
+def test_output_results_csv_without_a_minimum_length_is_unchanged(inference_app, tmp_path):
+    csv_path = tmp_path / "results.csv"
+    df = inference_app.output_results(make_results(inference_app), **{**NO_OUTPUT, "output_csv": csv_path})
+    # r4 is not in the results but there is no minimum length so it is not added to the CSV
+    full = pd.read_csv(csv_path, keep_default_na=False)
+    pd.testing.assert_frame_equal(full, df.reset_index(drop=True), check_dtype=False)
+
+
+def test_output_results_fasta_does_not_change_for_short_sequences(short_sequence_app, tmp_path):
+    output = tmp_path / "out.fasta"
+    short_sequence_app.output_results(make_results(short_sequence_app), **{**NO_OUTPUT, "output_fasta": output})
+    records = list(SeqIO.parse(output, "fasta"))
+    assert len(records) == 3
+    assert records[1].id == "r2#DNA/hAT"  # not renamed because it was not classified
+
+
+def test_evaluating_a_csv_with_short_sequences(short_sequence_app, tmp_path):
+    csv_path = tmp_path / "results.csv"
+    short_sequence_app.output_results(
+        make_results(short_sequence_app), **{**NO_OUTPUT, "output_csv": csv_path, "threshold": 0.0}
+    )
+    full = pd.read_csv(csv_path)
+    classified = full[full["accession"] != "r2"]
+    from terrier.evaluate import evaluate_results
+
+    for superfamily in [True, False]:
+        actual, predicted, _ = evaluate_results(full, superfamily=superfamily)
+        expected_actual, expected_predicted, _ = evaluate_results(classified, superfamily=superfamily)
+        # The short sequence is never evaluated as a prediction
+        assert list(actual) == list(expected_actual)
+        assert list(predicted) == list(expected_predicted)
 
 
 def test_output_results_fasta_renames_sequences(inference_app, inference_fasta, tmp_path):

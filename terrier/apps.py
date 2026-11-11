@@ -16,6 +16,13 @@ if TYPE_CHECKING:
     from torchmetrics import Metric
 
 
+def get_original_classification(original_id:str) -> str:
+    """ The classification in a sequence ID of the form 'accession#classification'. """
+    if "#" in original_id:
+        return original_id.split("#")[1]
+    return "null"
+
+
 class Terrier(Corgi):
     """
     Transposable Element Repeat Result classifIER
@@ -44,6 +51,53 @@ class Terrier(Corgi):
     @ta.method
     def monitor(self):
         return "accuracy_repeatmasker_subtype"
+
+    def add_short_sequences(self, results_df:"pd.DataFrame") -> "pd.DataFrame":
+        """
+        Adds a row to the results for each sequence that was skipped because it is shorter than the minimum length.
+
+        This means that the CSV files have a row for every sequence in the input, in the original order.
+        The rows for the skipped sequences have an 'Unknown' prediction and no probabilities.
+        """
+        import pandas as pd
+
+        min_length = getattr(self.dataloader, "min_length", 0)
+        if not min_length:
+            return results_df
+
+        def key(file, original_id, description):
+            return (str(file), original_id, description)
+
+        positions = {}
+        short_rows = []
+        position = 0
+        for file in self.dataloader.files:
+            for record in self.dataloader.parse(file):
+                positions.setdefault(key(file, record.id, record.description), position)
+                if len(record.seq) < min_length:
+                    short_rows.append(dict(
+                        file=file,
+                        accession=record.id.split("#")[0],
+                        prediction="Unknown",
+                        original_id=record.id,
+                        original_classification=get_original_classification(record.id),
+                        description=record.description,
+                        position=position,
+                    ))
+                position += 1
+
+        if not short_rows:
+            return results_df
+
+        columns = list(results_df.columns)
+        results_df = results_df.copy()
+        results_df["position"] = [
+            positions.get(key(file, original_id, description), float("inf"))
+            for file, original_id, description in zip(results_df["file"], results_df["original_id"], results_df["description"])
+        ]
+        combined = pd.concat([results_df, pd.DataFrame(short_rows)], ignore_index=True)
+        combined = combined.sort_values(by="position", kind="stable")
+        return combined[columns]
 
     @ta.method
     def output_results(
@@ -110,11 +164,7 @@ class Terrier(Corgi):
         ]
 
         results_df['accession'] = results_df['original_id'].apply(lambda x: x.split("#")[0])
-        def get_original_classification(original_id:str):
-            if "#" in original_id:
-                return original_id.split("#")[1]
-            return "null"
-        
+
         def get_prediction_probability(row):
             prediction = row["prediction"]
             if prediction in row:
@@ -195,18 +245,21 @@ class Terrier(Corgi):
 
                         SeqIO.write(record, fasta_out, "fasta")
 
+        # The CSV files include the sequences that were too short to be classified
+        csv_df = self.add_short_sequences(results_df) if (output_csv or output_tips_csv) else results_df
+
         if output_tips_csv:
             output_tips_csv = Path(output_tips_csv)
             output_tips_csv.parent.mkdir(exist_ok=True, parents=True)
             non_tips = [node_lineage_string(node) for node in self.classification_tree.node_list if not node.is_leaf]
-            tips_df = results_df.drop(columns=non_tips)
+            tips_df = csv_df.drop(columns=non_tips)
             tips_df.to_csv(output_tips_csv, index=False)
 
         if output_csv:
             output_csv = Path(output_csv)
             output_csv.parent.mkdir(exist_ok=True, parents=True)
-            console.print(f"Writing results for {len(results_df)} repeats to: {output_csv}")
-            results_df.to_csv(output_csv, index=False)
+            console.print(f"Writing results for {len(csv_df)} repeats to: {output_csv}")
+            csv_df.to_csv(output_csv, index=False)
 
         # if self.vector:
         #     # x = results_df.to_xarray()

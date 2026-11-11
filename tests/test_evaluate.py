@@ -1,4 +1,5 @@
 import pytest
+import pandas as pd
 from terrier.evaluate import build_map
 
 
@@ -116,6 +117,36 @@ def test_evaluate_results_map(results_df):
     actual, predicted, _ = evaluate_results(results_df, superfamily=True, map="hAT=TcMar")
     assert list(predicted) == ["DNA/TcMar", "DNA/TcMar", "LTR/Gypsy"]
     assert (actual == predicted).sum() == 3
+
+
+def test_evaluate_results_with_unclassified_sequences(results_df, capsys):
+    # A sequence which was too short to be classified has no probabilities
+    short = {column: np.nan for column in results_df.columns}
+    short.update(file="example.fasta", accession="r6", prediction="Unknown", original_id="r6#DNA/hAT", original_classification="DNA/hAT", description="")
+    df = pd.concat([results_df, pd.DataFrame([short])], ignore_index=True)
+
+    for superfamily, threshold in [(True, None), (True, 0.7), (False, None), (False, 0.7)]:
+        expected = evaluate_results(results_df, superfamily=superfamily, threshold=threshold)
+        actual, predicted, probability = evaluate_results(df, superfamily=superfamily, threshold=threshold)
+        assert list(actual) == list(expected[0])
+        assert list(predicted) == list(expected[1])
+        assert list(probability) == list(expected[2])
+
+    # The unclassified sequence is in the totals
+    capsys.readouterr()
+    evaluate_results(df, superfamily=True)
+    output = capsys.readouterr().out
+    assert "Total: 6\n" in output
+    assert "Total with ground truth: 5\n" in output
+    assert "Number classified: 3/5" in output
+
+
+def test_evaluate_metrics_counts_unclassified_sequences(results_df):
+    short = {column: np.nan for column in results_df.columns}
+    short.update(file="example.fasta", accession="r6", prediction="Unknown", original_id="r6#DNA/hAT", original_classification="DNA/hAT", description="")
+    df = pd.concat([results_df, pd.DataFrame([short])], ignore_index=True)
+    proportion, _ = evaluate_metrics(df, superfamily=True)
+    assert proportion == 3 / 6
 
 
 def test_evaluate_results_ignore_list(results_df):
