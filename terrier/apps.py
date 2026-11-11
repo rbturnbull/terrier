@@ -270,8 +270,23 @@ class Terrier(Corgi):
 
         return results_df
 
-    def checkpoint(self, checkpoint:Path=None) -> str:
-        return checkpoint or "https://github.com/rbturnbull/terrier/releases/download/v0.4.0/terrier-0.4.ckpt"
+    def checkpoint(self, checkpoint:str="latest") -> str:
+        if Path(checkpoint).exists():
+            return str(checkpoint)
+
+        if checkpoint == "latest":
+            # TODO Change to version 0.5
+            return "https://github.com/rbturnbull/terrier/releases/download/v0.4.0/terrier-0.4.ckpt"
+        elif checkpoint == "0.4":
+            # Trained with RepBase31.04
+            return "https://github.com/rbturnbull/terrier/releases/download/v0.4.0/terrier-0.4.ckpt"
+        elif checkpoint == "0.3" or checkpoint == "0.2" or checkpoint == "bib":
+            # The model weights did not change between versions 0.2 and 0.3, so we can use the same checkpoint for both.
+            # Trained with RepBase29.10 
+            # Version of Terrier for the publication in Briefings in Bioinformatics (2025)
+            return "https://github.com/rbturnbull/terrier/releases/download/v0.2.0/terrier-0.2.0.ckpt"
+
+        raise ValueError(f"Unknown checkpoint: {checkpoint}. Valid checkpoint are 'latest', '0.4', '0.3', '0.2', or 'bib'. Or provide a path to a local checkpoint file.")
     
     @ta.tool
     def preprocess(
