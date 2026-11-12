@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
   pages: write
   id-token: write
 
@@ -45,6 +46,16 @@ jobs:
 
     - name: Setup Pages
       uses: actions/configure-pages@v6
+
+    # deploy-pages fails if a re-run finds the artifact from an earlier attempt as well
+    - name: Remove artifacts from earlier attempts
+      if: github.run_attempt > 1
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+          --jq '.artifacts[] | select(.name == "github-pages") | .id' \
+          | xargs -r -I{} gh api -X DELETE "repos/${{ github.repository }}/actions/artifacts/{}"
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v5
