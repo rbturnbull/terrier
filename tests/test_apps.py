@@ -2,6 +2,7 @@ from pathlib import Path
 import shutil
 import pandas as pd
 import pytest
+import click
 import torch
 from Bio import SeqIO
 from hierarchicalsoftmax import SoftmaxNode
@@ -102,7 +103,7 @@ def test_checkpoint_latest_is_the_default(capsys):
     app = Terrier()
     assert app.checkpoint() == CHECKPOINT_VERSIONS[0].url
     assert app.checkpoint(checkpoint="latest") == CHECKPOINT_VERSIONS[0].url
-    assert f"v{CHECKPOINT_VERSIONS[0].version}" in capsys.readouterr().out
+    assert f"v{CHECKPOINT_VERSIONS[0].version}" in click.unstyle(capsys.readouterr().out)
 
 
 @pytest.mark.parametrize(
@@ -118,14 +119,14 @@ def test_checkpoint_versions(name, filename, capsys):
     url = Terrier().checkpoint(checkpoint=name)
     assert url.startswith("https://github.com/rbturnbull/terrier/releases/download/")
     assert url.endswith(filename)
-    assert resolve_checkpoint_version(name).description in capsys.readouterr().out
+    assert resolve_checkpoint_version(name).description in click.unstyle(capsys.readouterr().out)
 
 
 def test_checkpoint_local_path(tmp_path, capsys):
     path = tmp_path / "custom.ckpt"
     path.write_bytes(b"")
     assert Terrier().checkpoint(checkpoint=path) == path
-    assert "custom.ckpt" in capsys.readouterr().out
+    assert "custom.ckpt" in click.unstyle(capsys.readouterr().out)
 
 
 def test_checkpoint_url():
@@ -150,10 +151,12 @@ def test_checkpoint_names_are_unique():
 def test_checkpoint_help_lists_versions():
     result = CliRunner().invoke(Terrier().main_app, ["--help"], env={"COLUMNS": "1000"})
     assert result.exit_code == 0
-    assert "VERSION|PATH|URL" in result.stdout
+    # Rich forces colour on CI (e.g. GitHub Actions) so remove the ANSI styling
+    output = click.unstyle(result.stdout)
+    assert "VERSION|PATH|URL" in output
     for name in checkpoint_names():
-        assert f"'{name}'" in result.stdout
-    assert "Briefings in Bioinformatics" in result.stdout
+        assert f"'{name}'" in output
+    assert "Briefings in Bioinformatics" in output
 
 
 def test_metrics(classification_tree):
@@ -259,7 +262,7 @@ def test_output_results_with_a_high_threshold_predicts_the_root(inference_app):
 
 def test_output_results_without_outputs_says_so(inference_app, capsys):
     inference_app.output_results(make_results(inference_app), **NO_OUTPUT)
-    assert "No output files requested." in capsys.readouterr().out
+    assert "No output files requested." in click.unstyle(capsys.readouterr().out)
 
 
 def test_output_results_csv_files(inference_app, tmp_path):
